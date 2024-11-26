@@ -1,8 +1,6 @@
 # AA228V/CS238V: Validation of Safety-Critical Systems
 [![website](https://img.shields.io/badge/website-stanford-b31b1b.svg)](https://aa228v.stanford.edu/)
 
-<!-- Testing update -->
-
 ## Install `git`
 - https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
@@ -30,9 +28,8 @@ This will give you the `julia` command in your terminal.
     - Add the `AA228V` package in `pkg` mode: `dev .`
 
 ## Update AA228V (if necessary)
-- Open `julia` in a terminal.
-- Open Julia's `pkg` mode: `]`
-- In `pkg` mode, run: `up AA228V`
+- Open a terminal and navigate to your `AA228V.jl` directory.
+- Run: `git pull`
 
 # Projects
 - **[Project 0](./projects/project0)** — _A light-weight introduction to falsification._
