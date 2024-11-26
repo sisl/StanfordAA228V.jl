@@ -137,9 +137,10 @@ num_failures(sys, ψ; d=100, n=1000)
 
 # ╔═╡ 00d4d678-a19d-4bba-b8f5-79d7e1466a63
 md"""
-## Useful interface functions
+# Useful interface functions
 The following functions are provided by `AA228V.jl` that you may use.
 
+## `rollout`
 **`rollout(sys::System; d)::Array`** — Run a single rollout of the system `sys` to a depth of `d`.
 - `τ` is written as `\tau<TAB>` in code.
 ```julia
@@ -154,6 +155,8 @@ function rollout(sys::System; d)
     return τ
 end
 ```
+
+## `isfailure`
 
 **`isfailure(ψ, τ)::Bool`** — Using the specification `ψ`, check if the trajector `τ` led to a failure.
 - `ψ` is written as `\psi<TAB>` in code.
