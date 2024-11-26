@@ -145,12 +145,6 @@ isfailure(ψ::Specification, τ) = !evaluate(ψ, τ)
 ```
 """
 
-# ╔═╡ 4a91853f-9685-47f3-998a-8e0cfce688f8
-md"""
-## Running tests
-Run two tests, controlling the RNG seed for deterministic outputs.
-"""
-
 # ╔═╡ 2ff6bb9c-5282-4ba1-b62e-a9fd0fe1969c
 md"""
 ### Test 1: $n = 1000$
@@ -257,6 +251,14 @@ function run_project0_test(num_failures::Function; d=100, n=1000, seed=SEED)
 	Random.seed!(seed) # For determinism
 	return num_failures(sys, ψ; d, n)
 end
+
+# ╔═╡ 4a91853f-9685-47f3-998a-8e0cfce688f8
+Markdown.parse("""
+## Running tests
+Run two tests, controlling the RNG seed for deterministic outputs.
+
+$MODIFY_WARNING
+""")
 
 # ╔═╡ b6f15d9c-33b8-40e3-be57-d91eda1c9753
 begin
