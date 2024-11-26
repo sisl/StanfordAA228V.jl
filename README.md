@@ -9,8 +9,8 @@
 - Mykel Kochenderfer: [@mykelk](https://github.com/mykelk)
 - Robert Moss: [@mossr](https://github.com/mossr)
 - Harrison Delecki: [@hdelecki](https://github.com/hdelecki)
-- Sidharth Tadeparti: [@fchaubard](https://github.com/fchaubard)
-- Francois Chaubard: [@sidt36](https://github.com/sidt36)
+- Francois Chaubard: [@fchaubard](https://github.com/fchaubard)
+- Sidharth Tadeparti: [@sidt36](https://github.com/sidt36)
 
 # Projects
 - **[Project 0](./projects/project0)** — _A light-weight introduction to falsification._
