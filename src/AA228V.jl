@@ -5,6 +5,7 @@ using Random
 using Statistics
 using Parameters
 using SignalTemporalLogic
+using Plots
 # import Bijectors: bijector
 
 export
