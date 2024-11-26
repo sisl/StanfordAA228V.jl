@@ -16,7 +16,17 @@ This will give you the `julia` command in your terminal.
     - Go into `pkg` mode: `]`
     - Run: `add Pluto PlutoUI`
 1. Clone this git repo:
-    - `git clone https://github.com/sisl/AA228V.jl`
+    - Open a terminal and navigate to where you want the code to live.
+    - Run: `git clone https://github.com/sisl/AA228V.jl`
+    - Navigate to the code: `cd AA228V.jl`
+    - Open Julia: `julia`
+    - Open Julia's `pkg` mode: `]`
+    - Add the `AA228V` package in `pkg` mode: `add .`
+
+## Update AA228V (if necessary)
+- Open `julia` in a terminal.
+- Open Julia's `pkg` mode: `]`
+- In `pkg` mode, run: `up AA228V`
 
 # Projects
 - **[Project 0](./projects/project0/README.md)** — _A light-weight introduction to falsification._
