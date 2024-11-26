@@ -6,6 +6,7 @@ _A light-weight introduction to falsification._
 <p align="center"> <img src="./../../media/project0-gaussian.svg#gh-light-mode-only"> </p>
 <p align="center"> <img src="./../../media/project0-gaussian-dark.svg#gh-dark-mode-only"> </p>
 
+## Steps
 1. Open Pluto:
     - Run `julia` in a terminal.
     - Within Julia, run:
