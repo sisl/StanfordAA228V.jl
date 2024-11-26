@@ -4,6 +4,15 @@
 
 <p align="center"> <img src="./media/coverart.svg"> </p>
 
+# Projects
+- **[Project 0](./projects/project0)** — _A light-weight introduction to falsification._
+- **[Project 1](./projects/project1)** — _TODO._
+- **[Project 2](./projects/project2)** — _TODO._
+- **[Project 3](./projects/project3)** — _TODO._
+
+# Installation
+For additional installation help, [please post on Ed](https://edstem.org/us/courses/69226/discussion).
+
 ## Install `git`
 - https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
@@ -33,9 +42,3 @@ This will give you the `julia` command in your terminal.
 ## Update AA228V (if necessary)
 - Open a terminal and navigate to your `AA228V.jl` directory.
 - Run: `git pull`
-
-# Projects
-- **[Project 0](./projects/project0)** — _A light-weight introduction to falsification._
-- **[Project 1](./projects/project1)** — _TODO._
-- **[Project 2](./projects/project2)** — _TODO._
-- **[Project 3](./projects/project3)** — _TODO._
