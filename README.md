@@ -41,7 +41,7 @@ This will give you the `julia` command in your terminal.
 ## Install Packages
 1. Install **Pluto** and **PlutoUI**
     - In a terminal, run: `julia`
-    - Go into pkg mode: `]`
+    - In the Julia REPL, go into pkg mode: `]`
     - Run: 
         ```
         add Pluto PlutoUI
@@ -54,7 +54,7 @@ This will give you the `julia` command in your terminal.
         ```
     - Navigate to the code: `cd AA228V.jl`
     - Open Julia: `julia`
-    - Open Julia's pkg mode: `]`
+    - In the Julia REPL, go into pkg mode: `]`
     - Add the **AA228V** package in pkg mode:
         ```
         dev .
