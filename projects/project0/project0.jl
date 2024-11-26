@@ -180,12 +180,12 @@ Run two tests, controlling the RNG seed for deterministic outputs.
 
 # ╔═╡ 2ff6bb9c-5282-4ba1-b62e-a9fd0fe1969c
 md"""
-### Test 1
+### Test 1: $n = 1000$
 """
 
 # ╔═╡ 089581ec-8aff-4c56-9a65-26d394d5eec3
 md"""
-### Test 2
+### Test 2: $n = 5000$
 """
 
 # ╔═╡ cee165f0-049f-4ea3-8f19-04e66947a397
