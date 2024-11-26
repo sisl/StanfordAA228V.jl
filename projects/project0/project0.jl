@@ -43,14 +43,6 @@ _A light-weight introduction to falsification._
 If you encounter issues, [please ask us on Ed](https://edstem.org/us/courses/69226/discussion).
 """
 
-# ╔═╡ 17fa8557-9656-4347-9d44-213fd3b635a6
-md"""
-## System
-The system is comprised of an `agent`, environment (`env`), and `sensor`.
-
-⚠️ Note: **PLEASE DO NOT MODIFY**.
-"""
-
 # ╔═╡ 22feee3d-4627-4358-9937-3c780b7e8bcb
 begin
 	agent = NoAgent()
@@ -70,18 +62,6 @@ ps = Ps(env)
 
 # ╔═╡ ab4c6807-5b4e-4688-b794-159e26a1599b
 ψ = LTLSpecification(@formula □(s->s > -2));
-
-# ╔═╡ 370a15eb-df4b-493a-af77-00914b4616ea
-Markdown.parse("""
-## Specification \$\\psi\$
-The specification \$\\psi\$ (written `\\psi<TAB>` in code) indicates what the system should do:
-
-\$\$\\psi(\\tau) = \\square(s > $(ψ.formula.ϕ.c))\$\$
-
-i.e., "the system state \$s\$ in the trajectory \$\\tau\$ should _always_ (\$\\square\$) be above \$$(ψ.formula.ϕ.c)\$, anything else is a failure."
-
-⚠️ Note: **PLEASE DO NOT MODIFY**.
-""")
 
 # ╔═╡ 166bd412-d433-4dc9-b874-7359108c0a8b
 Markdown.parse("""
@@ -165,16 +145,6 @@ isfailure(ψ::Specification, τ) = !evaluate(ψ, τ)
 ```
 """
 
-# ╔═╡ 2827a6f3-47b6-4e6f-b6ae-63271715d1f3
-md"""
-# 📊 Tests 
-The tests below run your `num_failures` function to see if it works properly.
-
-This will automatically run anytime the `num_failures` function is changed and saved (due to Pluto having dependent cells).
-
-⚠️ Note: **PLEASE DO NOT MODIFY**.
-"""
-
 # ╔═╡ 4a91853f-9685-47f3-998a-8e0cfce688f8
 md"""
 ## Running tests
@@ -205,6 +175,8 @@ _You can ignore this._
 
 # ╔═╡ c151fc99-af4c-46ae-b55e-f50ba21f1f1c
 begin
+	global MODIFY_WARNING = md"⚠️ Note: **PLEASE DO NOT MODIFY**."
+
 	function hint(text)
 		return Markdown.MD(Markdown.Admonition("hint", "Hint", [text]))
 	end
@@ -250,6 +222,36 @@ begin
 	md"> **Helper functions and variables**."
 end
 
+# ╔═╡ 17fa8557-9656-4347-9d44-213fd3b635a6
+Markdown.parse("""
+## System
+The system is comprised of an `agent`, environment (`env`), and `sensor`.
+
+$MODIFY_WARNING
+""")
+
+# ╔═╡ 370a15eb-df4b-493a-af77-00914b4616ea
+Markdown.parse("""
+## Specification \$\\psi\$
+The specification \$\\psi\$ (written `\\psi<TAB>` in code) indicates what the system should do:
+
+\$\$\\psi(\\tau) = \\square(s > $(ψ.formula.ϕ.c))\$\$
+
+i.e., "the system state \$s\$ in the trajectory \$\\tau\$ should _always_ (\$\\square\$) be above \$$(ψ.formula.ϕ.c)\$, anything else is a failure."
+
+$MODIFY_WARNING
+""")
+
+# ╔═╡ 2827a6f3-47b6-4e6f-b6ae-63271715d1f3
+Markdown.parse("""
+# 📊 Tests 
+The tests below run your `num_failures` function to see if it works properly.
+
+This will automatically run anytime the `num_failures` function is changed and saved (due to Pluto having dependent cells).
+
+$MODIFY_WARNING
+""")
+
 # ╔═╡ 83884eb4-6718-455c-b731-342471325326
 function run_project0_test(num_failures::Function; d=100, n=1000, seed=SEED)
 	Random.seed!(seed) # For determinism
@@ -292,6 +294,8 @@ end
 
 # ╔═╡ 6302729f-b34a-4a18-921b-d194fe834208
 begin
+	# ⚠️ Note: PLEASE DO NOT MODIFY. Why are you in here anyhow :)?
+
 	test1_passed::Bool = test1_output == 19
 	test2_passed::Bool = test2_output == 110
 
