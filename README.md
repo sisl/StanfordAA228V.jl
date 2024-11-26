@@ -4,6 +4,14 @@
 
 <p align="center"> <img src="./media/coverart.svg"> </p>
 
+**Winter 2025 teaching team**:
+- Sydney Katz: [@smkatz12](https://github.com/smkatz12)
+- Mykel Kochenderfer: [@mykelk](https://github.com/mykelk)
+- Robert Moss: [@mossr](https://github.com/mossr)
+- Harrison Delecki: [@hdelecki](https://github.com/hdelecki)
+- Sidharth Tadeparti: [@fchaubard](https://github.com/fchaubard)
+- Francois Chaubard: [@sidt36](https://github.com/sidt36)
+
 # Projects
 - **[Project 0](./projects/project0)** — _A light-weight introduction to falsification._
 - **[Project 1](./projects/project1)** — _TODO._

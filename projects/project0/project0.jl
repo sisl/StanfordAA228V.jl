@@ -242,9 +242,9 @@ begin
 end
 
 # ╔═╡ 83884eb4-6718-455c-b731-342471325326
-function run_project0_test(n_failures::Function; d=100, n=1000, seed=SEED)
+function run_project0_test(num_failures::Function; d=100, n=1000, seed=SEED)
 	Random.seed!(seed) # For determinism
-    return n_failures(sys, ψ; d, n)
+    return num_failures(sys, ψ; d, n)
 end
 
 # ╔═╡ b6f15d9c-33b8-40e3-be57-d91eda1c9753
