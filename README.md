@@ -35,7 +35,7 @@ For additional installation help, [please post on Ed](https://edstem.org/us/cour
 This will give you the `julia` command in your terminal.
 
 ## Install Packages
-1. Install `Pluto` and `PlutoUI`
+1. Install **Pluto** and **PlutoUI**
     - In a terminal, run `julia`
     - Go into pkg mode: `]`
     - Run: `add Pluto PlutoUI`
@@ -45,7 +45,7 @@ This will give you the `julia` command in your terminal.
     - Navigate to the code: `cd AA228V.jl`
     - Open Julia: `julia`
     - Open Julia's pkg mode: `]`
-    - Add the AA228V package in pkg mode: `dev .`
+    - Add the **AA228V** package in pkg mode: `dev .`
 
 ## Update AA228V (if necessary)
 - Open a terminal and navigate to your "AA228V.jl" directory.
