@@ -319,7 +319,7 @@ begin
 	# Plot the Gaussian density
 	plot!(_X, _Y,
 	     xlim=(-4, 4),
-	     ylim=(0, 0.41),
+	     ylim=(-0.001, 0.41),
 	     linecolor=dark_mode ? "white" : "black",
 		 fillcolor=dark_mode ? "darkgray" : "lightgray",
 		 fill=true,
