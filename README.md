@@ -2,7 +2,8 @@
 [![website](https://img.shields.io/badge/website-stanford-b31b1b.svg)](https://aa228v.stanford.edu/)
 
 ## Install Julia
-https://julialang.org/downloads/
+**Requires Julia 1.11+**: https://julialang.org/downloads/
+
 - Windows users:
     - `winget install julia -s msstore`
 - Linux/macOS users:
@@ -21,7 +22,7 @@ This will give you the `julia` command in your terminal.
     - Navigate to the code: `cd AA228V.jl`
     - Open Julia: `julia`
     - Open Julia's `pkg` mode: `]`
-    - Add the `AA228V` package in `pkg` mode: `add .`
+    - Add the `AA228V` package in `pkg` mode: `dev .`
 
 ## Update AA228V (if necessary)
 - Open `julia` in a terminal.
