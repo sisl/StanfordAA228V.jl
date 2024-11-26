@@ -21,4 +21,5 @@ _A light-weight introduction to falsification._
             └ Opening http://localhost:1234/ in your default browser... ~ have fun!
             ```
 1. Open the `project0.jl` notebook from Pluto through this box (`<PATH_TO_AA228V.jl>/projects/project0/project0.jl`): <p align="center"> <img src="./../../media/pluto-open.png#gh-light-mode-only"> </p><p align="center"> <img src="./../../media/pluto-open-dark.png#gh-dark-mode-only"> </p>
+    - Click `Run notebook code`.
 1. See `project0.jl` within Pluto for details.
