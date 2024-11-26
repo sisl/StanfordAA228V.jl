@@ -28,24 +28,37 @@ For additional installation help, [please post on Ed](https://edstem.org/us/cour
 **Requires Julia 1.11+**: https://julialang.org/downloads/
 
 - Windows users:
-    - `winget install julia -s msstore`
+    ```
+    winget install julia -s msstore
+    ```
 - Linux/macOS users:
-    - `curl -fsSL https://install.julialang.org | sh`
+    ```
+    curl -fsSL https://install.julialang.org | sh
+    ```
 
 This will give you the `julia` command in your terminal.
 
 ## Install Packages
 1. Install **Pluto** and **PlutoUI**
-    - In a terminal, run `julia`
+    - In a terminal, run: `julia`
     - Go into pkg mode: `]`
-    - Run: `add Pluto PlutoUI`
+    - Run: 
+        ```
+        add Pluto PlutoUI
+        ```
 1. Clone this git repo:
     - Open a terminal and navigate to where you want the code to live.
-    - Run: `git clone https://github.com/sisl/AA228V.jl`
+    - Run: 
+        ```
+        git clone https://github.com/sisl/AA228V.jl
+        ```
     - Navigate to the code: `cd AA228V.jl`
     - Open Julia: `julia`
     - Open Julia's pkg mode: `]`
-    - Add the **AA228V** package in pkg mode: `dev .`
+    - Add the **AA228V** package in pkg mode:
+        ```
+        dev .
+        ```
 
 ## Update AA228V (if necessary)
 - Open a terminal and navigate to your "AA228V.jl" directory.
