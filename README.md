@@ -1,5 +1,5 @@
 # AA228V/CS238V: Validation of Safety-Critical Systems
-[![website](https://img.shields.io/badge/website-stanford-b31b1b.svg)](https://aa228v.stanford.edu/)
+[![website](https://img.shields.io/badge/website-Stanford-b31b1b.svg)](https://aa228v.stanford.edu/)
 [![textbook](https://img.shields.io/badge/textbook-MIT%20Press-1ba0e9.svg)](https://algorithmsbook.com/validation/)
 
 ## Install `git`
