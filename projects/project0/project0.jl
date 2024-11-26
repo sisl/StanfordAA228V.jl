@@ -100,7 +100,7 @@ html"""
 
 # ╔═╡ 798451be-5646-4b5e-b4d7-04d9fc9e6699
 """
-    num_failures(sys, ψ; d, n)
+	num_failures(sys, ψ; d, n)
 
 A function that takes in a system `sys` and a specification `ψ` and returns the number of failures.
 
@@ -108,7 +108,7 @@ A function that takes in a system `sys` and a specification `ψ` and returns the
 - `n` = number of rollouts
 """
 function num_failures(sys, ψ; d=100, n=1000)
-    # TODO: WRITE YOUR CODE HERE. Remember to return the number of failures.
+	# TODO: WRITE YOUR CODE HERE. Remember to return the number of failures.
 end
 
 # ╔═╡ 651313a4-2766-49dd-8737-475ed80079e2
