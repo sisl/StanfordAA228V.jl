@@ -76,9 +76,9 @@ Markdown.parse("""
 ## Specification \$\\psi\$
 The specification \$\\psi\$ (written `\\psi<TAB>` in code) indicates what the system should do:
 
-\$\$\\psi(s) = \\square(s > $(ψ.formula.ϕ.c))\$\$
+\$\$\\psi(\\tau) = \\square(s > $(ψ.formula.ϕ.c))\$\$
 
-i.e., "the system state \$s\$ should _always_ (\$\\square\$) be above \$$(ψ.formula.ϕ.c)\$, anything else is a failure."
+i.e., "the system state \$s\$ in the trajectory \$\\tau\$ should _always_ (\$\\square\$) be above \$$(ψ.formula.ϕ.c)\$, anything else is a failure."
 
 ⚠️ Note: **PLEASE DO NOT MODIFY**.
 """)
