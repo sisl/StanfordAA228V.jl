@@ -13,7 +13,7 @@
 
 This will give you the `julia` command in your terminal.
 
-## Install Packages
+## Install Julia Packages
 1. Install `Pluto` and `PlutoUI`
     - Open `julia`
     - Go into `pkg` mode: `]`
