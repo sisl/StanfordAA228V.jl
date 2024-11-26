@@ -101,8 +101,8 @@ html"""
 <!-- START_CODE -->
 """
 
-# ╔═╡ 798451be-5646-4b5e-b4d7-04d9fc9e6699
-"""
+# ╔═╡ 4e96d96e-d2c3-4780-8e4d-fbe31503574e
+md"""
 	num_failures(sys, ψ; d, n)
 
 A function that takes in a system `sys` and a specification `ψ` and returns the number of failures.
@@ -110,8 +110,10 @@ A function that takes in a system `sys` and a specification `ψ` and returns the
 - `d` = rollout depth
 - `n` = number of rollouts
 
-Note: `ψ` is written as `\\psi<TAB>`
+Note: `ψ` is written as `\psi<TAB>`
 """
+
+# ╔═╡ 798451be-5646-4b5e-b4d7-04d9fc9e6699
 function num_failures(sys, ψ; d=100, n=1000)
 	# TODO: WRITE YOUR CODE HERE. Remember to return the number of failures.
 end
@@ -130,7 +132,7 @@ md"""
 
 # ╔═╡ 2e2ec720-f9eb-4866-b3cc-7b9a66a7c698
 md"""
-Example usage with rollout depth `d=10` and `n=1000` number of rollouts.
+Example usage with rollout depth `d=100` and `n=1000` number of rollouts.
 """
 
 # ╔═╡ a6e52a4e-6e75-4ae0-9e3a-cc82f9ad6b2b
@@ -375,6 +377,7 @@ TableOfContents()
 # ╟─0cdadb29-9fcd-4a70-9937-c24f07ce4657
 # ╟─166bd412-d433-4dc9-b874-7359108c0a8b
 # ╟─86db41bf-c699-426c-a026-971b79dc0e2c
+# ╟─4e96d96e-d2c3-4780-8e4d-fbe31503574e
 # ╠═798451be-5646-4b5e-b4d7-04d9fc9e6699
 # ╟─651313a4-2766-49dd-8737-475ed80079e2
 # ╟─873c99d8-ebd8-4ce3-92ca-6975c713fc8b
