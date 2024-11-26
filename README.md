@@ -1,7 +1,8 @@
 # AA228V/CS238V: Validation of Safety-Critical Systems
 [![website](https://img.shields.io/badge/website-stanford-b31b1b.svg)](https://aa228v.stanford.edu/)
 
-<!-- Testing update -->
+## Install `git`
+- https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
 
 ## Install Julia
 **Requires Julia 1.11+**: https://julialang.org/downloads/
@@ -13,7 +14,7 @@
 
 This will give you the `julia` command in your terminal.
 
-## Install Julia Packages
+## Install Packages
 1. Install `Pluto` and `PlutoUI`
     - Open `julia`
     - Go into `pkg` mode: `]`
