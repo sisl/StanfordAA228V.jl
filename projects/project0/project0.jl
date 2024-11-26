@@ -68,8 +68,11 @@ The environment is a standard normal (Gaussian) distribution $\mathcal{N}(0, 1)$
 # ╔═╡ 9c1daa96-76b2-4a6f-8d0e-f95d26168d2b
 ps = Ps(env)
 
+# ╔═╡ d1f8559e-41c6-4551-943e-4906ae7778e3
+@bind c Slider(-4:0.01:4, default=-2) # Not included in the official notebook.
+
 # ╔═╡ ab4c6807-5b4e-4688-b794-159e26a1599b
-ψ = LTLSpecification(@formula □(s->s > -2));
+ψ = LTLSpecification(@eval @formula □(s->s > $c));
 
 # ╔═╡ 370a15eb-df4b-493a-af77-00914b4616ea
 Markdown.parse("""
@@ -106,6 +109,8 @@ A function that takes in a system `sys` and a specification `ψ` and returns the
 
 - `d` = rollout depth
 - `n` = number of rollouts
+
+Note: `ψ` is written as `\\psi<TAB>`
 """
 function num_failures(sys, ψ; d=100, n=1000)
 	# TODO: WRITE YOUR CODE HERE. Remember to return the number of failures.
@@ -137,6 +142,7 @@ md"""
 The following functions are provided by `AA228V.jl` that you may use.
 
 **`rollout(sys::System; d)::Array`** — Run a single rollout of the system `sys` to a depth of `d`.
+- `τ` is written as `\tau<TAB>`
 ```julia
 function rollout(sys::System; d)
     s = rand(Ps(sys.env))
@@ -151,6 +157,7 @@ end
 ```
 
 **`isfailure(ψ, τ)::Bool`** — Using the specification `ψ`, check if the trajector `τ` led to a failure.
+- `ψ` is written as `\psi<TAB>`
 ```julia
 isfailure(ψ::Specification, τ) = !evaluate(ψ, τ)
 ```
@@ -363,6 +370,7 @@ TableOfContents()
 # ╟─45f7c3a5-5763-43db-aba8-41ef8db39a53
 # ╠═9c1daa96-76b2-4a6f-8d0e-f95d26168d2b
 # ╟─370a15eb-df4b-493a-af77-00914b4616ea
+# ╠═d1f8559e-41c6-4551-943e-4906ae7778e3
 # ╠═ab4c6807-5b4e-4688-b794-159e26a1599b
 # ╟─0cdadb29-9fcd-4a70-9937-c24f07ce4657
 # ╟─166bd412-d433-4dc9-b874-7359108c0a8b
