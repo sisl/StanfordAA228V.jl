@@ -30,7 +30,7 @@ This will give you the `julia` command in your terminal.
 - In `pkg` mode, run: `up AA228V`
 
 # Projects
-- **[Project 0](./projects/project0/README.md)** — _A light-weight introduction to falsification._
-- **[Project 1](./projects/project1/README.md)** — _TODO._
-- **[Project 2](./projects/project2/README.md)** — _TODO._
-- **[Project 3](./projects/project3/README.md)** — _TODO._
+- **[Project 0](./projects/project0)** — _A light-weight introduction to falsification._
+- **[Project 1](./projects/project1)** — _TODO._
+- **[Project 2](./projects/project2)** — _TODO._
+- **[Project 3](./projects/project3)** — _TODO._
