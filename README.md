@@ -1,6 +1,8 @@
 # AA228V/CS238V: Validation of Safety-Critical Systems
 [![website](https://img.shields.io/badge/website-stanford-b31b1b.svg)](https://aa228v.stanford.edu/)
 
+<!-- Testing update -->
+
 ## Install Julia
 **Requires Julia 1.11+**: https://julialang.org/downloads/
 
