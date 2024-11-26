@@ -231,7 +231,7 @@ The specification \$\\psi\$ (written `\\psi<TAB>` in code) indicates what the sy
 
 \$\$\\psi(\\tau) = \\square(s > $(ψ.formula.ϕ.c))\$\$
 
-i.e., "the system state \$s\$ in the trajectory \$\\tau\$ should _always_ (\$\\square\$) be above \$$(ψ.formula.ϕ.c)\$, anything else is a failure."
+i.e., "the state \$s\$ in the trajectory \$\\tau\$ should _always_ (\$\\square\$) be above \$$(ψ.formula.ϕ.c)\$, anything else is a failure."
 
 $MODIFY_WARNING
 """)
