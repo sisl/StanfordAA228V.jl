@@ -14,7 +14,7 @@
 
 # Projects
 - **[Project 0](./projects/project0)** — _A light-weight introduction to falsification._
-- **[Project 1](./projects/project1)** — _TODO._
+- **[Project 1](./projects/project1)** — _Efficiently finding the most-likely failure._
 - **[Project 2](./projects/project2)** — _TODO._
 - **[Project 3](./projects/project3)** — _TODO._
 
@@ -39,26 +39,23 @@ For additional installation help, [please post on Ed](https://edstem.org/us/cour
 This will give you the `julia` command in your terminal.
 
 ## Install Packages
-1. Install **Pluto** and **PlutoUI**
-    - In a terminal, run: `julia`
-    - In the Julia REPL, go into pkg mode: `]`
-    - Run: 
-        ```
-        add Pluto PlutoUI
-        ```
 1. Clone this git repo:
-    - Open a terminal and navigate to where you want the code to live.
-    - Run: 
+    1. Open a terminal and navigate to where you want the code to live.
+    1. Run:
         ```
         git clone https://github.com/sisl/AA228V.jl
         ```
-    - Navigate to the code: `cd AA228V.jl`
-    - Open Julia: `julia`
-    - In the Julia REPL, go into pkg mode: `]`
-    - Add the **AA228V** package in pkg mode:
-        ```
-        dev .
-        ```
+1. Navigate to the code: `cd AA228V.jl`
+1. Open Julia: `julia`
+1. In the Julia REPL, go into pkg mode: `]`
+1. Add **Pluto** and **PlutoUI** in pkg mode:
+    ```
+    add Pluto PlutoUI
+    ```
+1. Add the **AA228V** package in pkg mode:
+    ```
+    dev .
+    ```
 
 ## Update AA228V (if necessary)
 - Open a terminal and navigate to your "AA228V.jl" directory.

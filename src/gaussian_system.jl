@@ -1,11 +1,11 @@
 ## Agent
 struct NoAgent <: Agent end
-(c::NoAgent)(s) = nothing
+(c::NoAgent)(s, a=missing) = nothing
 Distributions.pdf(c::NoAgent, s, x) = 1.0
 
 ## Environment
 struct SimpleGaussian <: Environment end
-(env::SimpleGaussian)(s, a) = s
+(env::SimpleGaussian)(s, a, xs=missing) = s
 Ps(env::SimpleGaussian) = Normal()
 
 ## Sensor
