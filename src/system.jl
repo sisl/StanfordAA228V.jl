@@ -87,6 +87,8 @@ function Distributions.pdf(p::TrajectoryDistribution, τ)
     return exp(logprob)
 end
 
+Distributions.logpdf(p::TrajectoryDistribution, τ) = log(pdf(p, τ))
+
 @counted step_counter function step(sys::System, s, x)
     o = sys.sensor(s, x.xo)
     a = sys.agent(o, x.xa)
@@ -114,11 +116,4 @@ function rollout(sys::System, p::TrajectoryDistribution; d=depth(p))
         s = s′
     end
     return τ
-end
-
-@counted step_counter function step(sys::System, s)
-    o = sys.sensor(s)
-    a = sys.agent(o)
-    s′ = sys.env(s, a)
-    return (; o, a, s′)
 end

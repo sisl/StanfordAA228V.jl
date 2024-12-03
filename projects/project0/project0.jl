@@ -177,10 +177,11 @@ html"""
 # ╔═╡ ba6c082b-6e62-42fc-a85c-c8b7efc89b88
 # ╠═╡ show_logs = false
 begin
-	# ⚠️ Note: Looking at this is a violation of the Honor Code. Turn back now. ⚠️
+	########################################################
+	# NOTE: DECODING THIS IS A VIOLATION OF THE HONOR CODE.
+	########################################################
 	@eval(Main,$(Meta.parse(String(base64decode("Iz0gTE9PS0lORyBBVCBUSElTIElTIEEgVklPTEFUSU9OIE9GIFRIRSBIT05PUiBDT0RFLiA9Iwptb2R1bGUgVEEKdXNpbmcgQUEyMjhWCm51bV9mYWlsdXJlcyhzeXMsIM6mOyBtPTEwMDApID0gc3VtKGlzZmFpbHVyZS4ozqYsIHJvbGxvdXQoc3lzKSBmb3Ig8J2RliBpbiAxOm0pKQplbmQ=")))))
 	𝑓 = Main.TA.num_failures
-
 	md"""
 	# Backend
 	_Helper functions and project management._
