@@ -1,6 +1,6 @@
 # AA228V/CS238V: Project 1
 [![website](https://img.shields.io/badge/website-Stanford-b31b1b.svg)](https://aa228v.stanford.edu/project-1/)
-[![html](https://img.shields.io/badge/static%21html-Project%210-0072B2)](https://htmlview.glitch.me/?https://github.com/sisl/AA228V.jl/blob/main/media/html/project1.html)
+[![html](https://img.shields.io/badge/static%20html-Project%201-0072B2)](https://htmlview.glitch.me/?https://github.com/sisl/AA228V.jl/blob/main/media/html/project1.html)
 
 _Efficiently finding the most-likely failure._
 
