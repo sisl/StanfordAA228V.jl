@@ -20,7 +20,7 @@ function (env::InvertedPendulum)(s, a, xs=missing)
     return [θ, ω]
 end
 
-Ps(env::InvertedPendulum) = Product([Uniform(-π / 16, π / 16), Uniform(-1., 1.)])
+Ps(env::InvertedPendulum) = MvNormal(zeros(2), diagm([(π/32)^2, 0.5^2]))
 
 struct AdditiveNoiseSensor <: Sensor
     Do

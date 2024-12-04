@@ -3,6 +3,7 @@ module AA228V
 using Distributions
 using Random
 using Statistics
+using LinearAlgebra
 using Parameters
 using ForwardDiff
 using Optim

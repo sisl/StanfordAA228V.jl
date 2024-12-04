@@ -78,16 +78,16 @@ function Distributions.logpdf(D::DisturbanceDistribution, s, o, a, x)
     return logp_xa + logp_xs + logp_xo
 end
 
-function Distributions.pdf(p::TrajectoryDistribution, τ)
+function Distributions.logpdf(p::TrajectoryDistribution, τ)
     logprob = logpdf(initial_state_distribution(p), τ[1].s)
     for (t, step) in enumerate(τ)
         s, o, a, x = step
         logprob += logpdf(disturbance_distribution(p, t), s, o, a, x)
     end
-    return exp(logprob)
+    return logprob
 end
 
-Distributions.logpdf(p::TrajectoryDistribution, τ) = log(pdf(p, τ))
+Distributions.pdf(p::TrajectoryDistribution, τ) = exp(logpdf(p, τ))
 
 @counted step_counter function step(sys::System, s, x)
     o = sys.sensor(s, x.xo)

@@ -80,7 +80,7 @@ i.e., "the state \$s\$ in the trajectory \$\\tau\$ should _always_ (\$\\square\$
 Markdown.parse("""
 A failure is unlikely given that the probability of failure is:
 
-\$\$p(s > $(ψ.formula.ϕ.c)) \\approx $(round(cdf(ps, ψ.formula.ϕ.c), sigdigits=4))\$\$
+\$\$P(s > $(ψ.formula.ϕ.c)) \\approx $(round(cdf(ps, ψ.formula.ϕ.c), sigdigits=4))\$\$
 """)
 
 # ╔═╡ 00d4d678-a19d-4bba-b8f5-79d7e1466a63
@@ -115,12 +115,9 @@ isfailure(ψ::Specification, τ) = !evaluate(ψ, τ)
 """
 
 # ╔═╡ 86db41bf-c699-426c-a026-971b79dc0e2c
-html"""
-<h1><b>👩‍💻 Task</b>: Count the number of failures</h1>
-<p>Please fill in the following <code>num_failures</code> function.</p>
-<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;START CODE&gt;</code></b></span><div class='line'></div></div></p>
-<p/>
-<!-- START_CODE -->
+md"""
+# 👩‍💻 **Task**: Count the number of failures
+Please fill in the following `num_failures` function.
 """
 
 # ╔═╡ 4e96d96e-d2c3-4780-8e4d-fbe31503574e
@@ -138,12 +135,6 @@ A function that takes in a system `sys` and a specification `ψ` and **returns t
 function num_failures(sys, ψ; m=1000)
 	# TODO: WRITE YOUR CODE HERE
 end
-
-# ╔═╡ 651313a4-2766-49dd-8737-475ed80079e2
-html"""
-<!-- END_CODE -->
-<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;END CODE&gt;</code></b></span><div class='line'></div></div></p>
-"""
 
 # ╔═╡ 873c99d8-ebd8-4ce3-92ca-6975c713fc8b
 md"""
@@ -190,8 +181,19 @@ end
 
 # ╔═╡ c151fc99-af4c-46ae-b55e-f50ba21f1f1c
 begin
-	function hint(text)
-		return Markdown.MD(Markdown.Admonition("hint", "Hint", [text]))
+	start_code() = HTML("""
+	<div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;START CODE&gt;</code></b></span><div class='line'></div></div>
+	<p> </p>
+	<!-- START_CODE -->
+	""")
+
+	end_code() = html"""
+	<!-- END CODE -->
+	<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;END CODE&gt;</code></b></span><div class='line'></div></div></p>
+	"""
+
+	function hint(text; title="Hint")
+		return Markdown.MD(Markdown.Admonition("hint", title, [text]))
 	end
 
 	function almost()
@@ -234,6 +236,15 @@ begin
 
 	md"> **Helper functions and variables**."
 end
+
+# ╔═╡ ddc8031f-fd06-4189-b00d-70f930998db4
+start_code()
+
+# ╔═╡ 651313a4-2766-49dd-8737-475ed80079e2
+end_code()
+
+# ╔═╡ bfc1779c-5ce8-47f5-be65-e4e74f2071cf
+hint(md"Can you write the `num_failures` function in one line of code? (Not required)"; title="Feeling adventurous?")
 
 # ╔═╡ 83884eb4-6718-455c-b731-342471325326
 function run_project0_test(num_failures::Function; m=1000, seed=SEED)
@@ -401,11 +412,13 @@ html"""
 # ╟─166bd412-d433-4dc9-b874-7359108c0a8b
 # ╟─00d4d678-a19d-4bba-b8f5-79d7e1466a63
 # ╟─86db41bf-c699-426c-a026-971b79dc0e2c
+# ╟─ddc8031f-fd06-4189-b00d-70f930998db4
 # ╟─4e96d96e-d2c3-4780-8e4d-fbe31503574e
 # ╠═798451be-5646-4b5e-b4d7-04d9fc9e6699
 # ╟─651313a4-2766-49dd-8737-475ed80079e2
 # ╟─873c99d8-ebd8-4ce3-92ca-6975c713fc8b
 # ╠═a6e52a4e-6e75-4ae0-9e3a-cc82f9ad6b2b
+# ╟─bfc1779c-5ce8-47f5-be65-e4e74f2071cf
 # ╟─2827a6f3-47b6-4e6f-b6ae-63271715d1f3
 # ╠═83884eb4-6718-455c-b731-342471325326
 # ╟─4a91853f-9685-47f3-998a-8e0cfce688f8

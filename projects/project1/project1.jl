@@ -20,6 +20,7 @@ end
 # ╠═╡ show_logs = false
 begin
 	using Test
+	using Base64
 	using PlutoUI
 	using Pkg
 	Pkg.develop(path=joinpath("..", "..")) # "develop" the local AA228V package
@@ -50,7 +51,7 @@ md"""
 
 Your job is to write the following function that returns the failure trajectory `τ` (i.e., a `Vector` of $(s,a,o,x)$ tuples) with the highest likelihood you found:
 ```julia
-most_likely_failure(sys, ψ; d, m)::Vector
+most_likely_failure(sys, ψ; n)::Vector
 ```
 
 If you encounter issues, [please ask us on Ed](https://edstem.org/us/courses/69226/discussion).
@@ -63,6 +64,8 @@ The small system is a simple 1D Gaussian system.
 - There are no dynamics (rollout depth $d=1$).
 - There are no disturbances.
 - The (initial and only) state $s$ is sampled from $\mathcal{N}(0,1)$.
+
+> **Reminder: One rollout has a fixed length of $d=1$.**
 """
 
 # ╔═╡ 17fa8557-9656-4347-9d44-213fd3b635a6
@@ -75,7 +78,7 @@ The system is comprised of an `agent`, environment (`env`), and `sensor`.
 sys_small = System(NoAgent(), SimpleGaussian(), IdealSensor());
 
 # ╔═╡ 6f3e24de-094c-49dc-b892-6721b3cc54ed
-SmallSystem = typeof(sys_small) # Type used for multiple dispatch
+SmallSystem::Type = typeof(sys_small) # Type used for multiple dispatch
 
 # ╔═╡ 45f7c3a5-5763-43db-aba8-41ef8db39a53
 md"""
@@ -103,7 +106,7 @@ i.e., "the state \$s\$ in the trajectory \$\\tau\$ should _always_ (\$\\square\$
 Markdown.parse("""
 A failure is unlikely given that the probability of failure is:
 
-\$\$p(s > $(ψ_small.formula.ϕ.c)) \\approx $(round(cdf(ps_small, ψ_small.formula.ϕ.c), sigdigits=4))\$\$
+\$\$P(s > $(ψ_small.formula.ϕ.c)) \\approx $(round(cdf(ps_small, ψ_small.formula.ϕ.c), sigdigits=4))\$\$
 """)
 
 # ╔═╡ 9132a200-f63b-444b-9830-b03cf075021b
@@ -111,7 +114,12 @@ md"""
 ## Baseline
 The following function is a baseline random falsification algorithm that returns the trajectory that led to the most-likely failure.
 
-**Your algorithm should do better than the random baseline.**
+> **Your algorithm should do better than the random baseline.**
+"""
+
+# ╔═╡ 99eb3a5f-c6d4-48b6-8e96-0adbd123b160
+md"""
+**TODO**: `d` and `m`
 """
 
 # ╔═╡ c2ae204e-dbcc-453a-81f5-791ba4be39db
@@ -119,7 +127,7 @@ The following function is a baseline random falsification algorithm that returns
 	pτ = NominalTrajectoryDistribution(sys, d)         # Trajectory distribution
 	τs = [rollout(sys, pτ; d) for _ in 1:m]            # Rollout with pτ, n*d steps
 	τs_failures = filter(τ->isfailure(ψ, τ), τs)       # Filter to get failure trajs
-	τ_most_likely = argmax(τ->pdf(pτ, τ), τs_failures) # Get most-likely failure traj
+	τ_most_likely = argmax(τ->logpdf(pτ, τ), τs_failures) # Most-likely failure traj
 	return τ_most_likely
 end
 
@@ -127,16 +135,15 @@ end
 md"""
 ### Example usage of small baseline
 Example usage with default rollout depth of `d=1` and `n=100` number of rollouts.
-
-> **Note**: In Pluto, to put multiple lines of code in one cell, wrap in a `begin` `end` block.
 """
 
 # ╔═╡ 7fe03702-25e5-473a-a92b-3b77eb753bc3
 begin
 	Random.seed!(4)
 	τ_baseline_small = most_likely_failure_baseline(sys_small, ψ_small)
-	pτ_small = NominalTrajectoryDistribution(sys_small)
-	ℓτ_small = pdf(pτ_small, τ_baseline_small)
+	p_τ_small = NominalTrajectoryDistribution(sys_small)
+	ℓ_τ_small = pdf(p_τ_small, τ_baseline_small)
+	n_steps_small = step_counter.count
 end;
 
 # ╔═╡ 73da2a56-8991-4484-bcde-7d397214e552
@@ -144,21 +151,25 @@ Markdown.parse("""
 ### Baseline results (small)
 
 \$\$\\begin{align}
-\\ell_\\text{baseline} &= $(round(ℓτ_small, sigdigits=5))\\tag{most-likely failure likelihood} \\\\
-n_\\text{steps} &= $(step_counter.count) \\tag{number of \\texttt{step} calls}
+\\ell_\\text{baseline} &= $(round(ℓ_τ_small, sigdigits=3))\\tag{most-likely failure log-likelihood} \\\\
+n_\\text{steps} &= $(n_steps_small) \\tag{number of \\texttt{step} calls}
 \\end{align}\$\$
+
+Reminder that the number of `step` calls \$n\$ is equal to the number of rollouts \$m\$ for the small system. This is because the rollout depth is \$d=1\$.
 """)
+
+# ╔═╡ a6603deb-57fa-403e-a2e5-1195ae7c016c
+md"""
+Here we plot $100$ states showing which ones were _successes_ and which ones were _failures_.
+"""
 
 # ╔═╡ 92f20cc7-8bc0-4aea-8c70-b0f759748fbf
 html"""
-<h2><b>1. Task (Small)</b>: Most-likely failure</h2>
+<h2>⟶ <b>Task (Small)</b>: Most-likely failure</h2>
 <p>Please fill in the following <code>most_likely_failure</code> function.</p>
 <ul>
 	<li><b>Note</b>: You have a maximum of <code>n=100</code> total calls to <code>step</code>.</li>
 </ul>
-<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;START CODE&gt;</code></b></span><div class='line'></div></div></p>
-<p/>
-<!-- START_CODE -->
 """
 
 # ╔═╡ f6589984-e24d-4aee-b7e7-db159ae7fea6
@@ -174,20 +185,20 @@ A function that takes in a system `sys` (1D Gaussian for the _small_ setting) an
 """
 
 # ╔═╡ fc2d34da-258c-4460-a0a4-c70b072f91ca
-@tracked function most_likely_failure(sys::SmallSystem, ψ; d=1, m=100)
+@tracked function most_likely_failure(sys::SmallSystem, ψ; n=100)
 	# TODO: WRITE YOUR CODE HERE
 end
-
-# ╔═╡ c494bb97-14ef-408c-9de1-ecabe221eea6
-html"""
-<!-- END_CODE -->
-<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;END CODE&gt;</code></b></span><div class='line'></div></div></p>
-"""
 
 # ╔═╡ ec776b30-6a30-4643-a22c-e071a365d50b
 md"""
 ## Hints
 Expand the sections below for some helpful hints.
+"""
+
+# ╔═╡ dba42df0-3199-4c31-a735-b6b514703d50
+md"""
+## Common Errors
+These are some common errors you may run into.
 """
 
 # ╔═╡ 8c78529c-1e00-472c-bb76-d984b37235ab
@@ -197,7 +208,10 @@ The medium system is a swinging inverted pendulum.
 - It uses a proportional controller to keep it upright.
 - The state is comprised of the angle $\theta$ and angular velocity $\omega$: $s = [\theta, \omega]$
 - Actions are left/right adjustments in the range $[-2, 2]$
-- Disturbances $\mathbf{x}$ are treated as addative noise: $\mathbf{x} \sim \mathcal{N}(\mathbf{0}, 0.1^2I)$
+- Disturbances $x$ are treated as addative noise: $x \sim \mathcal{N}(\mathbf{0}, 0.1^2I)$
+
+> **One rollout has a fixed length of $d=41$.**
+
 """
 
 # ╔═╡ daada216-11d4-4f8b-807c-d347130a3928
@@ -217,7 +231,7 @@ sys_medium = System(
 );
 
 # ╔═╡ c4c0328d-8cb3-41d5-9740-0197cbf760c2
-MediumSystem = typeof(sys_medium) # Type used for multiple dispatch
+MediumSystem::Type = typeof(sys_medium) # Type used for multiple dispatch
 
 # ╔═╡ b1e9bd40-a401-4630-9a1f-d61b276e72f7
 md"""
@@ -241,25 +255,22 @@ Example rollouts of the pendulum system and their plot below.
 # ╔═╡ 8b82eb8d-f6fe-4b73-8617-8c75dd65b769
 begin
 	Random.seed!(4)
-	pτ_medium_ex = NominalTrajectoryDistribution(sys_medium, 100)
-	τs_rollout_medium = [rollout(sys_medium, pτ_medium_ex; d=100) for i in 1:1000] 
+	pτ_medium_ex = NominalTrajectoryDistribution(sys_medium, 41)
+	τs_rollout_medium = [rollout(sys_medium, pτ_medium_ex; d=41) for i in 1:1000]
 end;
-
-# ╔═╡ 29b0823b-c76e-43a1-b7e6-d5b809082d65
-[pdf(pτ_medium_ex, τ) for τ in τs_rollout_medium]
 
 # ╔═╡ bdb27ba8-782c-467c-818d-f68c7790e845
 md"""
 ## Baseline: Medium
-Example usage with rollout depth of `d=100` and `m=1000` number of rollouts.
+Example usage with rollout depth of `d=41` and `m=1000` number of rollouts.
 """
 
 # ╔═╡ 3d00dc65-4c48-4988-9bb9-4cd3af6b9c5b
 begin
 	Random.seed!(4)
-	τ_base_medium = most_likely_failure_baseline(sys_medium, ψ_medium; d=100, m=1000)
-	pτ_medium = NominalTrajectoryDistribution(sys_medium, 100)
-	ℓτ_medium = pdf(pτ_medium, τ_base_medium)
+	τ_base_medium = most_likely_failure_baseline(sys_medium, ψ_medium; d=41, m=1000)
+	p_τ_medium = NominalTrajectoryDistribution(sys_medium, 41)
+	ℓ_τ_medium = logpdf(p_τ_medium, τ_base_medium)
 	n_steps_medium = step_counter.count
 end;
 
@@ -268,24 +279,17 @@ Markdown.parse("""
 ### Baseline results (medium)
 
 \$\$\\begin{align}
-\\ell_\\text{baseline} &= $(round(ℓτ_medium, sigdigits=3))\\tag{most-likely failure likelihood} \\\\
-n_\\text{steps} &= $(n_steps_medium) \\tag{number of \\texttt{step} calls \$d\\times n\$}
+\\ell_\\text{baseline} &= $(round(ℓ_τ_medium, sigdigits=3))\\tag{most-likely failure log-likelihood} \\\\
+n_\\text{steps} &= $(n_steps_medium) \\tag{number of \\texttt{step} calls \$d\\times m\$}
 \\end{align}\$\$
 """)
 
 # ╔═╡ 1da9695f-b7fc-46eb-9ef9-12160246018d
 md"""
-## **2. Task (Medium)**: Most-likely failure
+## ⟶ **Task (Medium)**: Most-likely failure
 Please fill in the following `most_likely_failure` function.
 - **Note**: You have a maximum of $n = d\times m = 1{,}000$ total calls to `step`.
     - For example $d=100$ and $m=10$
-"""
-
-# ╔═╡ 0606d827-9c70-4a79-afa7-14fb6b806546
-html"""
-<div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;START CODE&gt;</code></b></span><div class='line'></div></div>
-<p> </p>
-<!-- START_CODE -->
 """
 
 # ╔═╡ 9657f5ff-f21c-43c5-838d-402a2a723d5e
@@ -301,15 +305,9 @@ A function that takes in a system `sys` (inverted pendulum for the _medium_ sett
 """
 
 # ╔═╡ cb7b9b9f-59da-4851-ab13-c451c26117df
-@tracked function most_likely_failure(sys::MediumSystem, ψ; d=100, m=10)
+@tracked function most_likely_failure(sys::MediumSystem, ψ; n=1000)
 	# TODO: WRITE YOUR CODE HERE
 end
-
-# ╔═╡ 759534ca-b40b-4824-b7ec-3a5c06cbd23e
-html"""
-<!-- END_CODE -->
-<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;END CODE&gt;</code></b></span><div class='line'></div></div></p>
-"""
 
 # ╔═╡ 4943ca08-157c-40e1-acfd-bd9326082f56
 md"""
@@ -332,8 +330,19 @@ begin
 	cas_sensor = IdealSensor()
 	sys_large = System(cas_agent, cas_env, cas_sensor)
 
-	LargeSystem = typeof(sys_large) # Type used for multiple dispatch
+	LargeSystem::Type = typeof(sys_large) # Type used for multiple dispatch
 end
+
+# ╔═╡ d23f0299-981c-43b9-88f3-fb6e07927498
+md"""
+## Large environment
+The collision avoidance system has disturbances applied to the relative vertical rate variable $\dot{h}$ of the state (i.e., environment disturbances).
+
+$$\dot{h} + x \quad \text{where} \quad x \sim \mathcal{N}(0, 1.5)$$
+"""
+
+# ╔═╡ 641b92a3-8ff2-4aed-8482-9fa686803b68
+cas_env.Ds
 
 # ╔═╡ be426908-3fee-4ecd-b054-2497ce9a2e50
 md"""
@@ -351,8 +360,8 @@ i.e., "the absolute valued relative altitude $h$ (first element of the state $s$
 # ╔═╡ 1a097a88-e4f0-4a8d-a5d6-2e3858ee417c
 begin
 	Random.seed!(4)
-	pτ_large_ex = NominalTrajectoryDistribution(sys_large, 41)
-	τs_rollout_large = [rollout(sys_large, pτ_large_ex; d=41) for i in 1:10000]
+	p_τ_large_ex = NominalTrajectoryDistribution(sys_large, 41)
+	τs_rollout_large = [rollout(sys_large, p_τ_large_ex; d=41) for i in 1:10000]
 end;
 
 # ╔═╡ a4e0000b-4b4a-4262-bf0a-85509c4ee47e
@@ -364,8 +373,8 @@ md"""
 begin
 	Random.seed!(4)
 	τ_base_large = most_likely_failure_baseline(sys_large, ψ_large; d=41, m=10000)
-	pτ_large = NominalTrajectoryDistribution(sys_large, 41)
-	ℓτ_large = pdf(pτ_large, τ_base_large)
+	p_τ_large = NominalTrajectoryDistribution(sys_large, 41)
+	ℓ_τ_large = logpdf(p_τ_large, τ_base_large)
 end;
 
 # ╔═╡ 204feed7-cde8-40a8-b6b5-051a1c768fd9
@@ -373,35 +382,24 @@ Markdown.parse("""
 ### Baseline results (large)
 
 \$\$\\begin{align}
-\\ell_\\text{baseline} &= $(round(ℓτ_large, sigdigits=3))\\tag{most-likely failure likelihood} \\\\
-n_\\text{steps} &= $(step_counter.count) \\tag{number of \\texttt{step} calls \$d\\times n\$}
+\\ell_\\text{baseline} &= $(round(ℓ_τ_large, sigdigits=3))\\tag{most-likely failure log-likelihood} \\\\
+n_\\text{steps} &= $(step_counter.count) \\tag{number of \\texttt{step} calls \$d\\times m\$}
 \\end{align}\$\$
 """)
 
 # ╔═╡ 23fd490a-74d2-44b4-8a12-ea1460d95f85
 md"""
-## **3. Task (Large)**: Most-likely failure
+## ⟶ **Task (Large)**: Most-likely failure
 Please fill in the following `most_likely_failure` function.
 - **Note**: You have a maximum of $n = d\times m = 1{,}025{,}000$ total calls to `step`.
     - For $d=41$ and $m=25{,}000$
-"""
-
-# ╔═╡ 18a70925-3c2a-4317-8bbc-c2a096ec56d0
-html"""
-<!-- END_CODE -->
-<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;END CODE&gt;</code></b></span><div class='line'></div></div></p>
+> **_TODO_**.
 """
 
 # ╔═╡ 3471a623-16af-481a-8f66-5bd1e7890188
-@tracked function most_likely_failure(sys::LargeSystem, ψ; d=41, m=10000)
+@tracked function most_likely_failure(sys::LargeSystem, ψ; n=10000)
 	# TODO: WRITE YOUR CODE HERE
 end
-
-# ╔═╡ 9c46f710-da7e-4006-a419-5ab509f94dc1
-html"""
-<!-- END_CODE -->
-<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;END CODE&gt;</code></b></span><div class='line'></div></div></p>
-"""
 
 # ╔═╡ 2827a6f3-47b6-4e6f-b6ae-63271715d1f3
 Markdown.parse("""
@@ -433,16 +431,74 @@ html"""
 <p>If the following test indicator is <span style='color:#759466'><b>green</b></span>, you can submit <code>project0.jl</code> (this file) to Gradescope.</p>
 """
 
+# ╔═╡ 95e3d42f-b33f-4294-81c5-f34a300dc9b4
+# This needs to be in the cell above.
+html"""
+<script>
+let cell = currentScript.closest('pluto-cell')
+let id = cell.getAttribute('id')
+let cells_below = document.querySelectorAll(`pluto-cell[id='${id}'] ~ pluto-cell`)
+let cell_below_ids = [cells_below[0]].map((el) => el.getAttribute('id'))
+cell._internal_pluto_actions.set_and_run_multiple(cell_below_ids)
+</script>
+"""
+
 # ╔═╡ ba6c082b-6e62-42fc-a85c-c8b7efc89b88
-md"""
+# ╠═╡ show_logs = false
+begin
+	########################################################
+	# NOTE: DECODING THIS IS A VIOLATION OF THE HONOR CODE.
+	########################################################
+	ModuleTA = "UsingThisViolatesTheHonorCode_$(basename(tempname()))"
+	try
+		eval(Meta.parse("""
+		module $ModuleTA
+		$(String(base64decode("IyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMKIyBMT09LSU5HIEFUIFRISVMgSVMgQSBWSU9MQVRJT04gT0YgVEhFIEhPTk9SIENPREUKIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMKClRoaXNNb2R1bGUgPSBzcGxpdChzdHJpbmcoQF9fTU9EVUxFX18pLCAiLiIpW2VuZF0KCiMgTG9hZCBhbGwgY29kZSBhbmQgcGFja2FnZXMgZnJvbSBwYXJlbnQgbW9kdWxlClBhcmVudCA9IHBhcmVudG1vZHVsZShAX19NT0RVTEVfXykKCm1vZHVsZXMobTo6TW9kdWxlKSA9IGNjYWxsKDpqbF9tb2R1bGVfdXNpbmdzLCBBbnksIChBbnksKSwgbSkKCiMgTG9hZCBmdW5jdGlvbnMgYW5kIHZhcmlhYmxlcwpmb3IgbmFtZSBpbiBuYW1lcyhQYXJlbnQsIGltcG9ydGVkPXRydWUpCglpZiBuYW1lICE9IFN5bWJvbChUaGlzTW9kdWxlKSAmJiAhb2NjdXJzaW4oIiMiLCBzdHJpbmcobmFtZSkpICYmICFvY2N1cnNpbigiVXNpbmdUaGlzVmlvbGF0ZXNUaGVIb25vckNvZGUiLCBzdHJpbmcobmFtZSkpCgkJQGV2YWwgY29uc3QgJChuYW1lKSA9ICQoUGFyZW50KS4kKG5hbWUpCgllbmQKZW5kCgpleGNsdWRlcyA9IFsiUGx1dG9SdW5uZXIiLCAiSW50ZXJhY3RpdmVVdGlscyIsICJNYXJrZG93biIsICJDb3JlIiwgIkJhc2UiLCAiQmFzZS5NYWluSW5jbHVkZSJdCgojIExvYWQgcGFja2FnZXMKZm9yIG1vZCBpbiBtb2R1bGVzKFBhcmVudCkKCXN0cmluZyhtb2QpIGluIGV4Y2x1ZGVzICYmIGNvbnRpbnVlCgl0cnkKCQlAZXZhbCB1c2luZyAkKFN5bWJvbChtb2QpKQoJY2F0Y2ggZXJyCgkJaWYgZXJyIGlzYSBBcmd1bWVudEVycm9yCgkJCXRyeQoJCQkJQGV2YWwgdXNpbmcgQUEyMjhWLiQoU3ltYm9sKG1vZCkpCgkJCWNhdGNoIGVycjIKCQkJCUB3YXJuIGVycjIKCQkJZW5kCgkJZWxzZQoJCQlAd2FybiBlcnIKCQllbmQKCWVuZAplbmQKCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMNCiMgT3B0aW1pemF0aW9uLWJhc2VkIG1vc3QtbGlrZWx5IGZhaWx1cmUNCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMNCg0KZnVuY3Rpb24gcm9idXN0bmVzc19vYmplY3RpdmUoaW5wdXQsIHN5cywgz4g7IHNtb290aG5lc3M9MC4wKQ0KCXMsIPCdkLEgPSBleHRyYWN0KHN5cy5lbnYsIGlucHV0KQ0KCc+EID0gcm9sbG91dChzeXMsIHMsIPCdkLEpDQoJ8J2QrCA9IFtzdGVwLnMgZm9yIHN0ZXAgaW4gz4RdDQoJcmV0dXJuIHJvYnVzdG5lc3Mo8J2QrCwgz4guZm9ybXVsYSwgdz1zbW9vdGhuZXNzKQ0KZW5kDQoNCmZ1bmN0aW9uIHdlaWdodGVkX2xpa2VsaWhvb2Rfb2JqZWN0aXZlKGlucHV0LCBzeXMsIM+IOyBzbW9vdGhuZXNzPTEuMCwgzrs9MS4wKQ0KCXMsIPCdkLEgPSBleHRyYWN0KHN5cy5lbnYsIGlucHV0KQ0KCc+EID0gcm9sbG91dChzeXMsIHMsIPCdkLEpDQoJ8J2QrCA9IFtzdGVwLnMgZm9yIHN0ZXAgaW4gz4RdDQoJcCA9IE5vbWluYWxUcmFqZWN0b3J5RGlzdHJpYnV0aW9uKHN5cywgbGVuZ3RoKPCdkLEpKQ0KCXJldHVybiByb2J1c3RuZXNzKPCdkKwsIM+ILmZvcm11bGEsIHc9c21vb3RobmVzcykgLSDOuyAqIGxvZ3BkZihwLCDPhCkNCmVuZA0KDQpmdW5jdGlvbiBsaWtlbGlob29kX29iamVjdGl2ZSh4LCBzeXMsIM+IOyBzbW9vdGhuZXNzPTEuMCkNCglzLCDwnZCxID0gZXh0cmFjdChzeXMuZW52LCB4KQ0KCc+EID0gcm9sbG91dChzeXMsIHMsIPCdkLEpDQoJaWYgaXNmYWlsdXJlKM+ILCDPhCkNCgkJcCA9IE5vbWluYWxUcmFqZWN0b3J5RGlzdHJpYnV0aW9uKHN5cywgbGVuZ3RoKPCdkLEpKQ0KCQlyZXR1cm4gLWxvZ3BkZihwLCDPhCkNCgllbHNlDQoJCfCdkKwgPSBbc3RlcC5zIGZvciBzdGVwIGluIM+EXQ0KCQlyZXR1cm4gcm9idXN0bmVzcyjwnZCsLCDPiC5mb3JtdWxhLCB3PXNtb290aG5lc3MpDQoJZW5kDQplbmQNCg0Kc3RydWN0IE9wdGltaXphdGlvbkJhc2VkRmFsc2lmaWNhdGlvbg0KCW9iamVjdGl2ZSAjIG9iamVjdGl2ZSBmdW5jdGlvbg0KCW9wdGltaXplciAjIG9wdGltaXphdGlvbiBhbGdvcml0aG0NCmVuZA0KDQpmdW5jdGlvbiBmYWxzaWZ5KGFsZzo6T3B0aW1pemF0aW9uQmFzZWRGYWxzaWZpY2F0aW9uLCBzeXMsIM+IKQ0KCWYoeCkgPSBhbGcub2JqZWN0aXZlKHgsIHN5cywgz4gpDQoJcmV0dXJuIGFsZy5vcHRpbWl6ZXIoZiwgc3lzLCDPiCkNCmVuZA0KDQpAdHJhY2tlZCBmdW5jdGlvbiBncmFkaWVudF9kZXNjZW50KHN5cywgz4g7IG4sIM6xPTFlLTMpDQoJIyBmKHgpID0gd2VpZ2h0ZWRfbGlrZWxpaG9vZF9vYmplY3RpdmUoeCwgc3lzLCDPiDsgzrs9MC4wMSwgc21vb3RobmVzcz0wKQ0KCSMgZih4KSA9IGxpa2VsaWhvb2Rfb2JqZWN0aXZlKHgsIHN5cywgz4g7IHNtb290aG5lc3M9MSkNCglmKHgpID0gcm9idXN0bmVzc19vYmplY3RpdmUoeCwgc3lzLCDPiCkNCgniiIdmKHgpID0gRm9yd2FyZERpZmYuZ3JhZGllbnQoZiwgeCkNCgl4ID0gaW5pdGlhbF9ndWVzcyhzeXMpDQoJZm9yIGkgaW4gMTpuDQoJCXggLT0gzrEq4oiHZih4KQ0KCWVuZA0KCXJldHVybiB4DQplbmQNCg0KZnVuY3Rpb24gcnVuX2dkKHN5cywgz4g7IG49MTAwLCDOsT0xZS0zKQ0KCVJhbmRvbS5zZWVkISg0KQ0KCXggPSBncmFkaWVudF9kZXNjZW50KHN5cywgz4g7IG4sIM6xKQ0KCUBzaG93IHN0ZXBfY291bnRlci5jb3VudA0KCc+EID0gcm9sbG91dChzeXMsIGV4dHJhY3Qoc3lzLmVudiwgeCkuLi4pDQoJcmV0dXJuIM+EDQplbmQNCg0KQHRyYWNrZWQgZnVuY3Rpb24gbW9zdF9saWtlbHlfZmFpbHVyZV9uZWxkZXJfbWVhZChzeXM6OlN5c3RlbSwgz4g7IG49MTAwLCB2ZXJib3NlPWZhbHNlKQ0KCWZ1bmN0aW9uIG5lbGRlcl9tZWFkKGYsIHN5cywgz4gpDQoJCXjigoAgPSBpbml0aWFsX2d1ZXNzKHN5cykNCgkJYWxnID0gT3B0aW0uTmVsZGVyTWVhZCgpDQoJCW9wdGlvbnMgPSBPcHRpbS5PcHRpb25zKA0KCQkJc3RvcmVfdHJhY2U9dHJ1ZSwNCgkJCWV4dGVuZGVkX3RyYWNlPXRydWUsDQoJCQkjIGZfY2FsbHNfbGltaXQ9biwNCgkJCSMgZl9jYWxsc19saW1pdD1uLA0KCQkJIyBpdGVyYXRpb25zPW4sDQoJCSkNCgkJcmVzdWx0cyA9IG9wdGltaXplKGYsIHjigoAsIGFsZywgb3B0aW9ucykNCgkJaWYgdmVyYm9zZQ0KCQkJQHNob3cgc3RlcF9jb3VudGVyLmNvdW50DQoJCQlkaXNwbGF5KHJlc3VsdHMpDQoJCWVuZA0KCQnPhCA9IHJvbGxvdXQoc3lzLCBleHRyYWN0KHN5cy5lbnYsIE9wdGltLm1pbmltaXplcihyZXN1bHRzKSkuLi4pDQoJZW5kDQoNCgkjIG9iamVjdGl2ZSh4LCBzeXMsIM+IKSA9IHdlaWdodGVkX2xpa2VsaWhvb2Rfb2JqZWN0aXZlKHgsc3lzLM+IOyBzbW9vdGhuZXNzPTEsIM67PTAuMDAwMSkNCgkjIG9iamVjdGl2ZSh4LCBzeXMsIM+IKSA9IHJvYnVzdG5lc3Nfb2JqZWN0aXZlKHgsIHN5cywgz4g7IHNtb290aG5lc3M9MCkNCglvYmplY3RpdmUoeCwgc3lzLCDPiCkgPSBsaWtlbGlob29kX29iamVjdGl2ZSh4LCBzeXMsIM+IOyBzbW9vdGhuZXNzPTEpDQoJYWxnID0gT3B0aW1pemF0aW9uQmFzZWRGYWxzaWZpY2F0aW9uKG9iamVjdGl2ZSwgbmVsZGVyX21lYWQpDQoJz4RfZmFpbHVyZSA9IGZhbHNpZnkoYWxnLCBzeXMsIM+IKQ0KCXJldHVybiDPhF9mYWlsdXJlDQplbmQNCg0KQHRyYWNrZWQgZnVuY3Rpb24gbW9zdF9saWtlbHlfZmFpbHVyZV9sYmZncyhzeXM6OlN5c3RlbSwgz4g7IHc9MSwgbj0xMDAsIM67PTAuMDAwMSwgdmVyYm9zZT1mYWxzZSkNCglmdW5jdGlvbiBsYmZncyhmLCBzeXMsIM+IKQ0KCQl44oKAID0gaW5pdGlhbF9ndWVzcyhzeXMpDQoJCWFsZyA9IE9wdGltLkxCRkdTKCkNCgkJb3B0aW9ucyA9IE9wdGltLk9wdGlvbnMoDQoJCQlzdG9yZV90cmFjZT10cnVlLA0KCQkJZXh0ZW5kZWRfdHJhY2U9dHJ1ZSwNCgkJCWZfY2FsbHNfbGltaXQ9biwNCgkJCSMgZ19jYWxsc19saW1pdD1uw7cyLA0KCQkJIyBpdGVyYXRpb25zPW4sDQoJCSkNCgkJcmVzdWx0cyA9IG9wdGltaXplKGYsIHjigoAsIGFsZywgb3B0aW9uczsgYXV0b2RpZmY9OmZvcndhcmQpDQoJCWlmIHZlcmJvc2UNCgkJCUBzaG93IHN0ZXBfY291bnRlci5jb3VudA0KCQkJZGlzcGxheShyZXN1bHRzKQ0KCQllbmQNCgkJz4QgPSByb2xsb3V0KHN5cywgZXh0cmFjdChzeXMuZW52LCBPcHRpbS5taW5pbWl6ZXIocmVzdWx0cykpLi4uKQ0KCQlyZXR1cm4gz4QNCgllbmQNCg0KCSMgb2JqZWN0aXZlKHgsIHN5cywgz4gpID0gd2VpZ2h0ZWRfbGlrZWxpaG9vZF9vYmplY3RpdmUoeCwgc3lzLCDPiDsgc21vb3RobmVzcz13LCDOuykNCgkjIG9iamVjdGl2ZSh4LCBzeXMsIM+IKSA9IHJvYnVzdG5lc3Nfb2JqZWN0aXZlKHgsIHN5cywgz4g7IHNtb290aG5lc3M9dykNCglvYmplY3RpdmUoeCwgc3lzLCDPiCkgPSBsaWtlbGlob29kX29iamVjdGl2ZSh4LCBzeXMsIM+IOyBzbW9vdGhuZXNzPXcpDQoJYWxnID0gT3B0aW1pemF0aW9uQmFzZWRGYWxzaWZpY2F0aW9uKG9iamVjdGl2ZSwgbGJmZ3MpDQoJz4RfZmFpbHVyZSA9IGZhbHNpZnkoYWxnLCBzeXMsIM+IKQ0KCXJldHVybiDPhF9mYWlsdXJlDQplbmQNCg0KQHRyYWNrZWQgZnVuY3Rpb24gbW9zdF9saWtlbHlfZmFpbHVyZV9zZ2Qoc3lzOjpTeXN0ZW0sIM+IOyBuPTEwMCwgzrs9MC4wMDAxLCB3PTEsIHZlcmJvc2U9ZmFsc2UpDQoJZnVuY3Rpb24gc2dkKGYsIHN5cywgz4gpDQoJCXjigoAgPSBpbml0aWFsX2d1ZXNzKHN5cykNCgkJIyBhbGcgPSBPcHRpbS5HcmFkaWVudERlc2NlbnQoYWxwaGFndWVzcz0wLjEpDQoJCWFsZyA9IE9wdGltLkdyYWRpZW50RGVzY2VudChhbHBoYWd1ZXNzPTFlLTcpDQoJCW9wdGlvbnMgPSBPcHRpbS5PcHRpb25zKA0KCQkJc3RvcmVfdHJhY2U9dHJ1ZSwNCgkJCWV4dGVuZGVkX3RyYWNlPXRydWUsDQoJCQlmX2NhbGxzX2xpbWl0PW4sDQoJCQkjIGdfY2FsbHNfbGltaXQ9bsO3MiwNCgkJCSMgaXRlcmF0aW9ucz1uLA0KCQkpDQoJCXJlc3VsdHMgPSBvcHRpbWl6ZShmLCB44oKALCBhbGcsIG9wdGlvbnM7IGF1dG9kaWZmPTpmb3J3YXJkKQ0KCQlpZiB2ZXJib3NlDQoJCQlAc2hvdyBzdGVwX2NvdW50ZXIuY291bnQNCgkJCWRpc3BsYXkocmVzdWx0cykNCgkJZW5kDQoJCc+EID0gcm9sbG91dChzeXMsIGV4dHJhY3Qoc3lzLmVudiwgT3B0aW0ubWluaW1pemVyKHJlc3VsdHMpKS4uLikNCgkJcmV0dXJuIM+EDQoJZW5kDQoNCgkjIG9iamVjdGl2ZSh4LCBzeXMsIM+IKSA9IHJvYnVzdG5lc3Nfb2JqZWN0aXZlKHgsIHN5cywgz4g7IHNtb290aG5lc3M9dykNCgkjIG9iamVjdGl2ZSh4LCBzeXMsIM+IKSA9IHdlaWdodGVkX2xpa2VsaWhvb2Rfb2JqZWN0aXZlKHgsc3lzLM+IOyBzbW9vdGhuZXNzPTEsIM67KQ0KCW9iamVjdGl2ZSh4LCBzeXMsIM+IKSA9IGxpa2VsaWhvb2Rfb2JqZWN0aXZlKHgsIHN5cywgz4g7IHNtb290aG5lc3M9MSkNCglhbGcgPSBPcHRpbWl6YXRpb25CYXNlZEZhbHNpZmljYXRpb24ob2JqZWN0aXZlLCBzZ2QpDQoJz4RfZmFpbHVyZSA9IGZhbHNpZnkoYWxnLCBzeXMsIM+IKQ0KCXJldHVybiDPhF9mYWlsdXJlDQplbmQNCg0KDQojIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjDQojIEZ1enppbmcNCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMNCg0Kc3RydWN0IEdhdXNzaWFuRnV6emluZ0Rpc3RyaWJ1dGlvbiA8OiBUcmFqZWN0b3J5RGlzdHJpYnV0aW9uDQogICAgzrwgIyBwcm9wb3NhbDogc3RhdGUgbWVhbg0KICAgIM+DICMgcHJvcG9zYWw6IHN0YXRlIHN0YW5kYXJkIGRldmlhdGlvbg0KZW5kDQoNCmZ1bmN0aW9uIEFBMjI4Vi5pbml0aWFsX3N0YXRlX2Rpc3RyaWJ1dGlvbihwOjpHYXVzc2lhbkZ1enppbmdEaXN0cmlidXRpb24pDQogICAgcmV0dXJuIE5vcm1hbChwLs68LCBwLs+DKQ0KZW5kDQoNCiMgVE9ETzogRGVmYXVsdC4NCmZ1bmN0aW9uIEFBMjI4Vi5kaXN0dXJiYW5jZV9kaXN0cmlidXRpb24ocDo6R2F1c3NpYW5GdXp6aW5nRGlzdHJpYnV0aW9uLCB0KQ0KICAgIEQgPSBEaXN0dXJiYW5jZURpc3RyaWJ1dGlvbigobyktPkRldGVybWluaXN0aWMoKSwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKHMsYSktPkRldGVybWluaXN0aWMoKSwNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKHMpLT5EZXRlcm1pbmlzdGljKCkpDQogICAgcmV0dXJuIEQNCmVuZA0KDQpBQTIyOFYuZGVwdGgocDo6R2F1c3NpYW5GdXp6aW5nRGlzdHJpYnV0aW9uKSA9IDENCg0KQHRyYWNrZWQgZnVuY3Rpb24gbW9zdF9saWtlbHlfZmFpbHVyZV9mdXp6eShzeXM6OlNtYWxsU3lzdGVtLCDPiDsgZD0xLCBtPTEwMCkNCglwz4QgPSBOb21pbmFsVHJhamVjdG9yeURpc3RyaWJ1dGlvbihzeXMsIGQpICAgICAgICAgIyBUcmFqZWN0b3J5IGRpc3RyaWJ1dGlvbg0KCXHPhCA9IEdhdXNzaWFuRnV6emluZ0Rpc3RyaWJ1dGlvbigwLCA1KSAgICAgICAgICAjIFRyYWplY3RvcnkgZGlzdHJpYnV0aW9uDQoJIyBxz4QgPSBHYXVzc2lhbkZ1enppbmdEaXN0cmlidXRpb24oz4guZm9ybXVsYS7PlS5jLCAwLjEpICAgICAgICAgICMgVHJhamVjdG9yeSBkaXN0cmlidXRpb24NCgnPhHMgPSBbcm9sbG91dChzeXMsIHHPhDsgZCkgZm9yIF8gaW4gMTptXSAgICAgICAgICAgICMgUm9sbG91dCB3aXRoIHDPhCwgbipkIHN0ZXBzDQoJz4RzX2ZhaWx1cmVzID0gZmlsdGVyKM+ELT5pc2ZhaWx1cmUoz4gsIM+EKSwgz4RzKSAgICAgICAjIEZpbHRlciB0byBnZXQgZmFpbHVyZSB0cmFqcw0KCc+EX21vc3RfbGlrZWx5ID0gYXJnbWF4KM+ELT5sb2dwZGYocM+ELCDPhCksIM+Ec19mYWlsdXJlcykgIyBNb3N0LWxpa2VseSBmYWlsdXJlIHRyYWoNCglyZXR1cm4gz4RfbW9zdF9saWtlbHkNCmVuZA0KDQoNCnN0cnVjdCBQZW5kdWx1bUZ1enppbmdEaXN0cmlidXRpb24gPDogVHJhamVjdG9yeURpc3RyaWJ1dGlvbg0KICAgIM6j4oKSICMgc2Vuc29yIGRpc3R1cmJhbmNlIGNvdmFyaWFuY2UNCiAgICBkICMgZGVwdGgNCmVuZA0KDQpmdW5jdGlvbiBBQTIyOFYuaW5pdGlhbF9zdGF0ZV9kaXN0cmlidXRpb24ocDo6UGVuZHVsdW1GdXp6aW5nRGlzdHJpYnV0aW9uKQ0KICAgIHJldHVybiBQcm9kdWN0KFtVbmlmb3JtKC3PgCAvIDE2LCDPgCAvIDE2KSwgVW5pZm9ybSgtMS4sIDEuKV0pDQplbmQNCg0KZnVuY3Rpb24gQUEyMjhWLmRpc3R1cmJhbmNlX2Rpc3RyaWJ1dGlvbihwOjpQZW5kdWx1bUZ1enppbmdEaXN0cmlidXRpb24sIHQpDQogICAgRCA9IERpc3R1cmJhbmNlRGlzdHJpYnV0aW9uKChvKS0+RGV0ZXJtaW5pc3RpYygpLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAocyxhKS0+RGV0ZXJtaW5pc3RpYygpLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAocyktPk12Tm9ybWFsKHplcm9zKDIpLCBwLs6j4oKSKSkNCiAgICByZXR1cm4gRA0KZW5kDQoNCkFBMjI4Vi5kZXB0aChwOjpQZW5kdWx1bUZ1enppbmdEaXN0cmlidXRpb24pID0gcC5kDQoNCkB0cmFja2VkIGZ1bmN0aW9uIG1vc3RfbGlrZWx5X2ZhaWx1cmVfZnV6enkoc3lzOjpNZWRpdW1TeXN0ZW0sIM+IOyBkPTQxLCBtPTEwMCkNCglwz4QgPSBOb21pbmFsVHJhamVjdG9yeURpc3RyaWJ1dGlvbihzeXMsIGQpICAgICAgICAgIyBUcmFqZWN0b3J5IGRpc3RyaWJ1dGlvbg0KCXHPhCA9IFBlbmR1bHVtRnV6emluZ0Rpc3RyaWJ1dGlvbigwLjE1XjIqSSwgZCkgICAgICAgICAjIFRyYWplY3RvcnkgZGlzdHJpYnV0aW9uDQoJz4RzID0gW3JvbGxvdXQoc3lzLCBxz4Q7IGQpIGZvciBfIGluIDE6bV0gICAgICAgICAgICAjIFJvbGxvdXQgd2l0aCBwz4QsIG4qZCBzdGVwcw0KCc+Ec19mYWlsdXJlcyA9IGZpbHRlcijPhC0+aXNmYWlsdXJlKM+ILCDPhCksIM+EcykgICAgICAgIyBGaWx0ZXIgdG8gZ2V0IGZhaWx1cmUgdHJhanMNCgnPhF9tb3N0X2xpa2VseSA9IGFyZ21heCjPhC0+bG9ncGRmKHDPhCwgz4QpLCDPhHNfZmFpbHVyZXMpICMgTW9zdC1saWtlbHkgZmFpbHVyZSB0cmFqDQoJcmV0dXJuIM+EX21vc3RfbGlrZWx5DQplbmQNCg0KDQpzdHJ1Y3QgQ0FTRnV6emluZ0Rpc3RyaWJ1dGlvbiA8OiBUcmFqZWN0b3J5RGlzdHJpYnV0aW9uDQogICAgz4PigpsgIyBlbnZpcm9ubWVudCBkaXN0dXJiYW5jZSBjb3ZhcmlhbmNlDQogICAgZCAgIyBkZXB0aA0KZW5kDQoNCmZ1bmN0aW9uIEFBMjI4Vi5pbml0aWFsX3N0YXRlX2Rpc3RyaWJ1dGlvbihwOjpDQVNGdXp6aW5nRGlzdHJpYnV0aW9uKQ0KICAgIHJldHVybiBwcm9kdWN0X2Rpc3RyaWJ1dGlvbihVbmlmb3JtKC0xMDAsIDEwMCksIFVuaWZvcm0oLTEwLCAxMCksIERpc2NyZXRlTm9uUGFyYW1ldHJpYyhbMF0sIFsxLjBdKSwgRGlzY3JldGVOb25QYXJhbWV0cmljKFs0MF0sIFsxLjBdKSkNCmVuZA0KDQpmdW5jdGlvbiBBQTIyOFYuZGlzdHVyYmFuY2VfZGlzdHJpYnV0aW9uKHA6OkNBU0Z1enppbmdEaXN0cmlidXRpb24sIHQpDQogICAgRCA9IERpc3R1cmJhbmNlRGlzdHJpYnV0aW9uKChvKS0+RGV0ZXJtaW5pc3RpYygpLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAocyxhKS0+Tm9ybWFsKDAsIHAuz4PigpspLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAocyktPkRldGVybWluaXN0aWMoKSkNCiAgICByZXR1cm4gRA0KZW5kDQoNCkFBMjI4Vi5kZXB0aChwOjpDQVNGdXp6aW5nRGlzdHJpYnV0aW9uKSA9IHAuZA==")))
+		end"""))
+		global UsingThisViolatesTheHonorCode = getfield(@__MODULE__, Symbol(ModuleTA))
+	catch err
+		@warn err
+	end
+
+	most_likely_failure_nelder_mead = 
+		UsingThisViolatesTheHonorCode.most_likely_failure_nelder_mead
+
+	most_likely_failure_lbfgs = 
+		UsingThisViolatesTheHonorCode.most_likely_failure_lbfgs
+
+	most_likely_failure_sgd = 
+		UsingThisViolatesTheHonorCode.most_likely_failure_sgd
+
+	most_likely_failure_fuzzy = 
+		UsingThisViolatesTheHonorCode.most_likely_failure_fuzzy
+
+	PendulumFuzzingDistribution = 
+		UsingThisViolatesTheHonorCode.PendulumFuzzingDistribution
+
+	CASFuzzingDistribution = 
+		UsingThisViolatesTheHonorCode.CASFuzzingDistribution
+
+	run_gd = UsingThisViolatesTheHonorCode.run_gd
+end; md"""
 # Backend
-_You can ignore this._
+_Helper functions and project management._
 """
 
 # ╔═╡ c151fc99-af4c-46ae-b55e-f50ba21f1f1c
 begin
-	function hint(text)
-		return Markdown.MD(Markdown.Admonition("hint", "Hint", [text]))
+	start_code() = html"""
+	<div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;START CODE&gt;</code></b></span><div class='line'></div></div>
+	<p> </p>
+	<!-- START_CODE -->
+	"""
+
+	end_code() = html"""
+	<!-- END CODE -->
+	<p><div class='container'><div class='line'></div><span class='text' style='color:#B1040E'><b><code>&lt;END CODE&gt;</code></b></span><div class='line'></div></div></p>
+	"""
+
+	function hint(text; title="Hint")
+		return Markdown.MD(Markdown.Admonition("hint", title, [text]))
 	end
 
 	function almost()
@@ -472,13 +528,17 @@ begin
 		return Markdown.MD(Markdown.Admonition("correct", "Tests passed!", [text]))
 	end
 
+	function combine_html_md(contents::Vector; return_html=true)
+		process(str) = str isa HTML ? str.content : html(str)
+		return join(map(process, contents))
+	end
+
 	function html_expand(title, content::Markdown.MD)
 		return HTML("<details><summary>$title</summary>$(html(content))</details>")
 	end
 
-	function html_expand(title, content::Vector)
-		process(str) = str isa HTML ? str.content : html(str)
-		html_code = join(map(process, content))
+	function html_expand(title, contents::Vector)
+		html_code = combine_html_md(contents; return_html=false)
 		return HTML("<details><summary>$title</summary>$html_code</details>")
 	end
 
@@ -508,10 +568,43 @@ begin
 	md"> **Helper functions and variables**."
 end
 
+# ╔═╡ fe044059-9102-4e7f-9888-d9f03eec69ff
+html_expand("Expand for general Julia/Pluto tips.", md"""
+1. You can create as many new cells anywhere as you like.
+    - **Important**: Please do not modify/delete any existing cells.
+2. To put multple lines of code in a single cell in Pluto, wrap with `begin` and `end`:
+```julia
+begin
+	x = 10
+	y = x^2
+end
+```
+3. To suppress the Pluto output of a cell, add a semicolon `;` at the end.
+```julia
+x = 10;
+```
+or
+```julia
+begin
+	x = 10
+	y = x^2
+end;
+```
+""")
+
 # ╔═╡ a46702a3-4a8c-4749-bd00-52f8cce5b8ee
 html_half_space()
 
 # ╔═╡ e52ffc4f-947d-468e-9650-b6c67a57a62b
+html_quarter_space()
+
+# ╔═╡ a003beb6-6235-455c-943a-e381acd00c0e
+start_code()
+
+# ╔═╡ c494bb97-14ef-408c-9de1-ecabe221eea6
+end_code()
+
+# ╔═╡ e2418154-4471-406f-b900-97905f5d2f59
 html_quarter_space()
 
 # ╔═╡ 18754cc6-c089-4245-ad10-2848594e49b4
@@ -520,9 +613,10 @@ html_expand("Expand for useful interface functions.", [
 	md"""
 	The following functions are provided by `AA228V.jl` that you may use.
 	""",
-	html"<h3hide><code>pdf</code></h3hide>",
+	html"<h3hide><code>logpdf</code></h3hide>",
 	md"""
-**`pdf(p::TrajectoryDistribution, τ::Vector)::Float64`** — Evaluate the probability density of the trajectory `τ` using the trajectory distribution `p`.
+**`logpdf(p::TrajectoryDistribution, τ::Vector)::Float64`** — Evaluate the log probability density of the trajectory `τ` using the trajectory distribution `p`.
+- Use `logpdf` instead of `pdf` for numerical stability.
 """,
 	html"<h3hide><code>rollout</code></h3hide>",
 	md"""
@@ -546,19 +640,6 @@ end
 **`isfailure(ψ, τ)::Bool`** — Using the specification `ψ`, check if the trajector `τ` led to a failure.
 - `ψ` is written as `\psi<TAB>` in code.
 """])
-
-# ╔═╡ a0a60728-4ee0-4fd0-bd65-c056956b9712
-html_expand("Expand if you get an error <code>reducing over an empty collection</code>.", md"""
-The following error may occur:
-> **ArgumentError**: reducing over an empty collection is not allowed; consider supplying `init` to the reducer
-
-This is usually because there were no failures found and you are trying to iterate over an empty set. Example: `τs_failures` may be equal to `[]`, resulting in the error:
-```julia
-τ_most_likely = argmax(τ->pdf(pτ, τ), τs_failures)
-```
-
-**Potential solution**: Try increasing `m` to sample more rollouts.
-""")
 
 # ╔═╡ d566993e-587d-4aa3-995b-eb955dec5758
 html_expand("Expand for baseline implementation using <code>DirectFalsification</code>.", [
@@ -586,7 +667,7 @@ alg = DirectFalsification(1, 100)
 
 # ╔═╡ e888241c-b89f-4db4-ac35-6d826ec4c36c
 html_expand("Expand if using optimization-based falsification.", [
-	html"<h2hide>Robustness</h2hide>",
+	html"<h2hide>Robustness and gradients</h2hide>",
 	md"""
 Robustness can be a useful metric to find failures. If the robustness is $\le 0$, this indicates a failure.
 
@@ -625,20 +706,14 @@ x0 = initial_guess(sys::MediumSystem) # InvertedPendulum
 x0 = initial_guess(sys::LargeSystem)  # CollisionAvoidance
 
 initial_guess(sys::SmallSystem) = [0.0]
-initial_guess(sys::MediumSystem) = zeros(42)
-initial_guess(sys::LargeSystem) = zeros(41)
+initial_guess(sys::MediumSystem) = zeros(84)
+initial_guess(sys::LargeSystem) = [rand(Normal(0,100)), zeros(42)...]
 ```
-""",
-	html"<h2hide>Gradient-free optimization</h2hide>",
-	md"""
-If you are using _gradient free_ methods such as Nelder Mead from Optim.jl, you may need to use
-```julia
-iter.metadata["centroid"]
-```
-instead of the following from Example 4.5 in the textbook:
-```julia
-iter.metadata["x"]
-```
+- To explain where these numbers came from:
+    - `SmallSystem`: the initial guess is $0$ for the only search parameter: the initial state.
+    - `MediumSystem`: the initial guess is $d \times |x| + |s_0| = 84$ for $d = 41$, $|x| = 2$ (disturbance on both $\theta$ and $\omega$), and $|s_0| = 2$ for both components of the initial state.
+    - `LargeSystem`: the initial guess is $d \times |x| + |\{s_0^{(1)}, s_0^{(2)}\}| = 43$ for $d = 41$, $|x| = 1$ (disturbance is only on the environment), and $|\{s_0^{(1)}, s_0^{(2)}\}| = 2$ for searching only over the $h$ and $\dot{h}$ initial state variables, setting the initial $h$ to $h \sim \mathcal{N}(0, 100)$.
+- Or you can write your own optimization algorithm :)
 """,
 	html"<h2hide>Details on the <code>extract</code> function</h2hide>",
 	md"""
@@ -658,6 +733,30 @@ s, 𝐱 = extract(env::InvertedPendulum, input)
 s, 𝐱 = extract(env::CollisionAvoidance, input)
 ```
 """])
+
+# ╔═╡ c4fa9af9-1a79-43d7-9e8d-2854652a4ea2
+html_expand("Stuck? Expand for hint on what to try.", md"""
+$(hint(md"Try fuzzing! See _Example 4.3_ in the textbook. _Other techniques_: optimization or planning."))""")
+
+# ╔═╡ a0a60728-4ee0-4fd0-bd65-c056956b9712
+html_expand("Expand if you get an error <code>reducing over an empty collection</code>.", md"""
+The following error may occur:
+> **ArgumentError**: reducing over an empty collection is not allowed; consider supplying `init` to the reducer
+
+This is usually because there were no failures found and you are trying to iterate over an empty set. Example: `τs_failures` may be equal to `[]`, resulting in the error:
+```julia
+τ_most_likely = argmax(τ->pdf(pτ, τ), τs_failures)
+```
+
+**Potential solution**: Try increasing `m` to sample more rollouts.
+""")
+
+# ╔═╡ b0a4461b-89d0-48ee-9bcf-b544b9f08154
+html_expand("Expand if you're getting <code>NaN</code> likelihood errors.", md"""
+Likelihoods or log-likelihoods equal to `NaN` may be a result of `log(pdf(p, τ))` due to numerical stability issues.
+
+**Instead**, please use `logpdf(p, τ)` instead (better numerical stability).
+""")
 
 # ╔═╡ fda151a1-5069-44a8-baa1-d7903bc89797
 html_space()
@@ -698,10 +797,7 @@ function plot_pendulum(sys::MediumSystem, ψ, τ=missing;
 	elseif τ isa Vector
 		# Single trajectory
 		get_color(ψ, τ) = isfailure(ψ, τ) ? "#F5615C" : "#009E73"
-		get_lw(ψ, τ) = isfailure(ψ, τ) ? 2 : 1
-		get_α(ψ, τ) = isfailure(ψ, τ) ? 1 : 0.25
-
-		plot_pendulum_traj!(τ; lw=get_lw(ψ, τ), α=get_α(ψ, τ), color=get_color(ψ, τ))
+		plot_pendulum_traj!(τ; lw=2, color=get_color(ψ, τ))
 	end
 
 	return plot!()
@@ -711,16 +807,27 @@ end
 plot_pendulum(sys_medium, ψ_medium, τs_rollout_medium; max_lines=100)
 
 # ╔═╡ e12b102e-785b-46e9-980c-e9f7943eda60
-plot_pendulum(sys_medium, ψ_medium, τ_base_medium; title="Most-likely failure")
+plot_pendulum(sys_medium, ψ_medium, τ_base_medium; title="Most-likely failure found")
 
 # ╔═╡ bac5c489-553c-436f-b332-8a8e97126a51
+html_quarter_space()
+
+# ╔═╡ 0606d827-9c70-4a79-afa7-14fb6b806546
+start_code()
+
+# ╔═╡ 759534ca-b40b-4824-b7ec-3a5c06cbd23e
+end_code()
+
+# ╔═╡ 4d2675e1-947c-4cd5-a7e7-49ab6c604577
 html_quarter_space()
 
 # ╔═╡ 420e2a64-a96b-4e12-a846-06de7cf0bae1
 html_expand("Expand if using optimization-based falsification.", md"""
 Note that the number of function calls `f(x)` output by the Optim results when running `display(results)` may be different than the `step_counter`.
 
-This is because Optim counts the number of objective function calls `f` and the objective function may run `rollout` (i.e., mulitple calls to `step`) multiple times.
+This is because Optim counts the number of objective function calls `f` and the objective function may run `rollout` (i.e., mulitple calls to `step` based on depth `d`) multiple times.
+
+This is not applicable for the small problem, as the depth is $d=1$.
 """)
 
 # ╔═╡ 60ab8107-db65-4fb6-aeea-d4978aed77bd
@@ -762,10 +869,7 @@ function plot_cas(sys::LargeSystem, ψ, τ=missing; max_lines=100, title="")
 	elseif τ isa Vector
 		# Single trajectory
 		get_color(ψ, τ) = isfailure(ψ, τ) ? "#F5615C" : "#009E73"
-		get_lw(ψ, τ) = isfailure(ψ, τ) ? 2 : 1
-		get_α(ψ, τ) = isfailure(ψ, τ) ? 1 : 0.25
-
-		plot_cas_traj!(τ; lw=get_lw(ψ, τ), α=get_α(ψ, τ), color=get_color(ψ, τ))
+		plot_cas_traj!(τ; lw=2, color=get_color(ψ, τ))
 	end
 
 	return plot!()
@@ -774,17 +878,31 @@ end
 # ╔═╡ aa0c4ffc-d7f0-484e-a1e2-7f6f92a3a53d
 md"""
 # 3️⃣ **Large**: Aircraft Collision Avoidance
-The large system is an aircraft collision avoidance system.
+The large system is an aircraft collision avoidance system (CAS).
 - It uses an interpolated lookup-table policy.
 - The state is comprised of the relative altitude (m) $h$, the relative vertical rate $\dot{h}$ (m/s), the previous action $a_\text{prev}$, and the time to closest point of approach $t_\text{col}$ (sec): $s = [h, \dot{h}, a_\text{prev}, t_\text{col}]$
 - Actions are $a \in [-5, 0, 5]$ vertical rate changes.
 - Disturbances $x$ are applied to $\dot{h}$ as sensor noise: $x \sim \mathcal{N}(0, 1.5)$
+
+> **One rollout has a fixed length of $d=41$ (time from $40-0$ seconds to collision).**
 
 $(plot_cas(sys_large, ψ_large, τ_base_large))
 """
 
 # ╔═╡ 797cbe41-a5f3-4179-9143-9ef6e6888a4d
 plot_cas(sys_large, ψ_large, τs_rollout_large)
+
+# ╔═╡ 4ae85f59-4e94-48aa-8ccb-91311466c51f
+plot_cas(sys_large, ψ_large, τ_base_large)
+
+# ╔═╡ e3d6fdf1-3a9e-446b-8482-49d6f64b652e
+html_quarter_space()
+
+# ╔═╡ 18a70925-3c2a-4317-8bbc-c2a096ec56d0
+start_code()
+
+# ╔═╡ 4c5210d6-598f-4167-a6ee-93bceda7223b
+end_code()
 
 # ╔═╡ 74aeca7b-0658-427f-8c02-d093a0d725ee
 html_space()
@@ -872,20 +990,20 @@ begin
 	end
 
 	function extract(env::InvertedPendulum, x)
-		s = [0.0, 0.0]
-		𝐱 = [Disturbance(0, 0, x[i:i+1]) for i in 1:2:length(x)]
+		s = x[1:2]
+		𝐱 = [Disturbance(0, 0, x[i:i+1]) for i in 3:2:length(x)]
 		return s, 𝐱
 	end
 
 	function extract(env::CollisionAvoidance, x)
-		s = [0.0, 0.0, 0.0, 41]
-		𝐱 = [Disturbance(0, x[i], 0) for i in 1:length(x)]
+		s = [x[1], x[2], 0, 40] # [h, ḣ, a_prev, t_col]
+		𝐱 = [Disturbance(0, x[i], 0) for i in 3:length(x)]
 		return s, 𝐱
 	end
 
 	initial_guess(sys::SmallSystem) = [0.0]
-	initial_guess(sys::MediumSystem) = zeros(42)
-	initial_guess(sys::LargeSystem) = zeros(4*41)
+	initial_guess(sys::MediumSystem) = zeros(84)
+	initial_guess(sys::LargeSystem) = [rand(Normal(0,100)), zeros(42)...]
 
 	md"> **Helper `extract` and `initial_guess` functions**."
 end
@@ -893,9 +1011,11 @@ end
 # ╔═╡ a6931d1e-08ad-4592-a54c-fd76cdc51294
 @bind dark_mode DarkModeIndicator()
 
-# ╔═╡ 0cdadb29-9fcd-4a70-9937-c24f07ce4657
-begin
-	if dark_mode
+# ╔═╡ 381240d5-32b2-4d68-9c7f-18aca1cff0a9
+function plot_gaussian(sys, ψ, τ=missing; is_dark_mode=dark_mode, max_points=100)
+	ps = Ps(sys.env)
+	
+	if is_dark_mode
 		plot(
 			bg="transparent",
 			background_color_inside="black",
@@ -909,14 +1029,14 @@ begin
 
 	# Create a range of x values
 	_X = range(-4, 4, length=1000)
-	_Y = pdf.(ps_small, _X)
+	_Y = pdf.(ps, _X)
 
 	# Plot the Gaussian density
 	plot!(_X, _Y,
 	     xlim=(-4, 4),
 	     ylim=(-0.001, 0.41),
-	     linecolor=dark_mode ? "white" : "black",
-		 fillcolor=dark_mode ? "darkgray" : "lightgray",
+	     linecolor=is_dark_mode ? "white" : "black",
+		 fillcolor=is_dark_mode ? "darkgray" : "lightgray",
 		 fill=true,
 	     xlabel="state \$s\$",
 	     ylabel="density \$p(s)\$",
@@ -924,7 +1044,7 @@ begin
 	     label=false)
 
 	# Identify the indices where x <= -2
-	idx = _X .<= ψ_small.formula.ϕ.c
+	idx = _X .<= ψ.formula.ϕ.c
 
 	# Extract the x and y values for the region to fill
 	x_fill = _X[idx]
@@ -945,7 +1065,52 @@ begin
 	      label=false)
 
 	# Draw failure threshold
-	vline!([ψ_small.formula.ϕ.c], color="crimson", label="Failure threshold")
+	vline!([ψ.formula.ϕ.c], color="crimson", label="Failure threshold")
+
+	if !ismissing(τ)
+		count_plotted_succeses = 0
+		count_plotted_failures = 0
+		function plot_point!(τᵢ)
+			if isfailure(ψ, τᵢ) && count_plotted_failures == 0
+				label = "Failure state"
+				count_plotted_failures += 1
+			elseif !isfailure(ψ, τᵢ) && count_plotted_succeses == 0
+				label = "Succes state"
+				count_plotted_succeses += 1
+			else
+				label = false
+			end
+			color = isfailure(ψ, τᵢ) ? "black" : "#009E73"
+			τₓ = τᵢ[1].s[1]
+			scatter!([τₓ], [pdf(ps, τₓ)], color=color, msc="white", m=:circle, label=label)
+		end
+
+		if τ isa Vector{<:Vector}
+			# Multiple rollouts
+			for (i,τᵢ) in enumerate(τ)
+				i > max_points && break
+				plot_point!(τᵢ)
+			end
+		elseif τ isa Vector
+			# Single rollout
+			plot_point!(τ)
+		end
+	end
+
+	return plot!()
+end
+
+# ╔═╡ e86d260f-c93d-4561-a9f1-44e4c7af827e
+plot_gaussian(sys_small, ψ_small)
+
+# ╔═╡ d4d057d7-cc9d-4949-9e3f-44a8aa67d725
+plot_gaussian(sys_small, ψ_small, τ_baseline_small)
+
+# ╔═╡ fe7f4a79-1a63-4272-a776-358a309c8550
+begin
+	Random.seed!(4)
+	τs_baseline_small = [rollout(sys_small, p_τ_small) for i in 1:100]
+	plot_gaussian(sys_small, ψ_small, τs_baseline_small)
 end
 
 # ╔═╡ ef084fea-bf4d-48d9-9c84-8cc1dd98f2d7
@@ -1016,6 +1181,7 @@ html"""
 
 # ╔═╡ Cell order:
 # ╟─60f72d30-ab80-11ef-3c20-270dbcdf0cc4
+# ╟─fe044059-9102-4e7f-9888-d9f03eec69ff
 # ╟─a46702a3-4a8c-4749-bd00-52f8cce5b8ee
 # ╟─fd8c851a-3a42-41c5-b0fd-a12085543c9b
 # ╟─17fa8557-9656-4347-9d44-213fd3b635a6
@@ -1025,23 +1191,33 @@ html"""
 # ╠═9c1daa96-76b2-4a6f-8d0e-f95d26168d2b
 # ╟─370a15eb-df4b-493a-af77-00914b4616ea
 # ╠═ab4c6807-5b4e-4688-b794-159e26a1599b
-# ╟─0cdadb29-9fcd-4a70-9937-c24f07ce4657
+# ╟─381240d5-32b2-4d68-9c7f-18aca1cff0a9
+# ╠═e86d260f-c93d-4561-a9f1-44e4c7af827e
 # ╟─166bd412-d433-4dc9-b874-7359108c0a8b
 # ╟─9132a200-f63b-444b-9830-b03cf075021b
+# ╟─99eb3a5f-c6d4-48b6-8e96-0adbd123b160
 # ╠═c2ae204e-dbcc-453a-81f5-791ba4be39db
 # ╟─e73635cc-2b1e-4162-8760-b62184e70b6d
 # ╠═7fe03702-25e5-473a-a92b-3b77eb753bc3
 # ╟─73da2a56-8991-4484-bcde-7d397214e552
+# ╠═d4d057d7-cc9d-4949-9e3f-44a8aa67d725
+# ╟─a6603deb-57fa-403e-a2e5-1195ae7c016c
+# ╠═fe7f4a79-1a63-4272-a776-358a309c8550
 # ╟─e52ffc4f-947d-468e-9650-b6c67a57a62b
 # ╟─92f20cc7-8bc0-4aea-8c70-b0f759748fbf
+# ╟─a003beb6-6235-455c-943a-e381acd00c0e
 # ╟─f6589984-e24d-4aee-b7e7-db159ae7fea6
 # ╠═fc2d34da-258c-4460-a0a4-c70b072f91ca
 # ╟─c494bb97-14ef-408c-9de1-ecabe221eea6
+# ╟─e2418154-4471-406f-b900-97905f5d2f59
 # ╟─ec776b30-6a30-4643-a22c-e071a365d50b
 # ╟─18754cc6-c089-4245-ad10-2848594e49b4
-# ╟─a0a60728-4ee0-4fd0-bd65-c056956b9712
 # ╟─d566993e-587d-4aa3-995b-eb955dec5758
 # ╟─e888241c-b89f-4db4-ac35-6d826ec4c36c
+# ╟─c4fa9af9-1a79-43d7-9e8d-2854652a4ea2
+# ╟─dba42df0-3199-4c31-a735-b6b514703d50
+# ╟─a0a60728-4ee0-4fd0-bd65-c056956b9712
+# ╟─b0a4461b-89d0-48ee-9bcf-b544b9f08154
 # ╟─fda151a1-5069-44a8-baa1-d7903bc89797
 # ╟─8c78529c-1e00-472c-bb76-d984b37235ab
 # ╟─daada216-11d4-4f8b-807c-d347130a3928
@@ -1054,7 +1230,6 @@ html"""
 # ╠═8b82eb8d-f6fe-4b73-8617-8c75dd65b769
 # ╟─d95b0228-71b0-4cae-990e-4bab368c25d9
 # ╠═44c8fbe0-21e7-482b-84a9-c3d32a4737dd
-# ╠═29b0823b-c76e-43a1-b7e6-d5b809082d65
 # ╟─bdb27ba8-782c-467c-818d-f68c7790e845
 # ╠═3d00dc65-4c48-4988-9bb9-4cd3af6b9c5b
 # ╠═e12b102e-785b-46e9-980c-e9f7943eda60
@@ -1065,12 +1240,15 @@ html"""
 # ╟─9657f5ff-f21c-43c5-838d-402a2a723d5e
 # ╠═cb7b9b9f-59da-4851-ab13-c451c26117df
 # ╟─759534ca-b40b-4824-b7ec-3a5c06cbd23e
+# ╟─4d2675e1-947c-4cd5-a7e7-49ab6c604577
 # ╟─4943ca08-157c-40e1-acfd-bd9326082f56
 # ╟─420e2a64-a96b-4e12-a846-06de7cf0bae1
 # ╟─60ab8107-db65-4fb6-aeea-d4978aed77bd
 # ╟─aa0c4ffc-d7f0-484e-a1e2-7f6f92a3a53d
 # ╟─7d054465-9f80-4dfb-9b5f-76c3977de7cd
 # ╠═1ec68a39-8de9-4fd3-be8a-26cf7706d1d6
+# ╟─d23f0299-981c-43b9-88f3-fb6e07927498
+# ╠═641b92a3-8ff2-4aed-8482-9fa686803b68
 # ╟─be426908-3fee-4ecd-b054-2497ce9a2e50
 # ╠═258e14c4-9a2d-4515-9a8f-8cd96f31a6ff
 # ╠═1a097a88-e4f0-4a8d-a5d6-2e3858ee417c
@@ -1078,11 +1256,13 @@ html"""
 # ╠═797cbe41-a5f3-4179-9143-9ef6e6888a4d
 # ╟─a4e0000b-4b4a-4262-bf0a-85509c4ee47e
 # ╠═b5d02715-b7c9-4bf2-a284-42da40a70a68
+# ╠═4ae85f59-4e94-48aa-8ccb-91311466c51f
 # ╟─204feed7-cde8-40a8-b6b5-051a1c768fd9
+# ╟─e3d6fdf1-3a9e-446b-8482-49d6f64b652e
 # ╟─23fd490a-74d2-44b4-8a12-ea1460d95f85
 # ╟─18a70925-3c2a-4317-8bbc-c2a096ec56d0
 # ╠═3471a623-16af-481a-8f66-5bd1e7890188
-# ╟─9c46f710-da7e-4006-a419-5ab509f94dc1
+# ╟─4c5210d6-598f-4167-a6ee-93bceda7223b
 # ╟─74aeca7b-0658-427f-8c02-d093a0d725ee
 # ╟─2827a6f3-47b6-4e6f-b6ae-63271715d1f3
 # ╠═83884eb4-6718-455c-b731-342471325326
@@ -1096,6 +1276,7 @@ html"""
 # ╠═712e69bf-48e7-47e9-a14e-25cce64d4ae4
 # ╟─cee165f0-049f-4ea3-8f19-04e66947a397
 # ╠═6302729f-b34a-4a18-921b-d194fe834208
+# ╟─95e3d42f-b33f-4294-81c5-f34a300dc9b4
 # ╟─ba6c082b-6e62-42fc-a85c-c8b7efc89b88
 # ╟─173388ab-207a-42a6-b364-b2c1cb335f6b
 # ╟─c151fc99-af4c-46ae-b55e-f50ba21f1f1c
