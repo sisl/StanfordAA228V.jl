@@ -223,6 +223,10 @@ begin
 		return Markdown.MD(Markdown.Admonition("correct", "Tests passed!", [text]))
 	end
 
+	html_space() = html"<br><br><br><br><br><br><br><br><br><br><br><br><br><br>"
+	html_half_space() = html"<br><br><br><br><br><br><br>"
+	html_quarter_space() = html"<br><br><br>"
+
 	global SEED = sum(Int.(collect("AA228V"))) # Cheeky seed value :)
 
 	DarkModeIndicator() = PlutoUI.HypertextLiteral.@htl("""
@@ -237,11 +241,17 @@ begin
 	md"> **Helper functions and variables**."
 end
 
+# ╔═╡ ea2f1380-6071-4a20-9b87-daf7d2b7ee33
+html_half_space()
+
 # ╔═╡ ddc8031f-fd06-4189-b00d-70f930998db4
 start_code()
 
 # ╔═╡ 651313a4-2766-49dd-8737-475ed80079e2
 end_code()
+
+# ╔═╡ c683b6a8-0c0f-4232-b914-a70f3e2b06e8
+html_half_space()
 
 # ╔═╡ bfc1779c-5ce8-47f5-be65-e4e74f2071cf
 hint(md"Can you write the `num_failures` function in one line of code? (Not required)"; title="Feeling adventurous?")
@@ -411,11 +421,13 @@ html"""
 # ╟─0cdadb29-9fcd-4a70-9937-c24f07ce4657
 # ╟─166bd412-d433-4dc9-b874-7359108c0a8b
 # ╟─00d4d678-a19d-4bba-b8f5-79d7e1466a63
+# ╟─ea2f1380-6071-4a20-9b87-daf7d2b7ee33
 # ╟─86db41bf-c699-426c-a026-971b79dc0e2c
 # ╟─ddc8031f-fd06-4189-b00d-70f930998db4
 # ╟─4e96d96e-d2c3-4780-8e4d-fbe31503574e
 # ╠═798451be-5646-4b5e-b4d7-04d9fc9e6699
 # ╟─651313a4-2766-49dd-8737-475ed80079e2
+# ╟─c683b6a8-0c0f-4232-b914-a70f3e2b06e8
 # ╟─873c99d8-ebd8-4ce3-92ca-6975c713fc8b
 # ╠═a6e52a4e-6e75-4ae0-9e3a-cc82f9ad6b2b
 # ╟─bfc1779c-5ce8-47f5-be65-e4e74f2071cf
