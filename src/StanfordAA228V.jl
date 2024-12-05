@@ -1,4 +1,4 @@
-module AA228V
+module StanfordAA228V
 
 using Distributions
 using Random
@@ -66,4 +66,4 @@ include("gaussian_system.jl")
 include("inverted_pendulum.jl")
 include("cas.jl")
 
-end # module AA228V
+end # module StanfordAA228V
