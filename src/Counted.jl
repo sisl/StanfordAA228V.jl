@@ -1,45 +1,80 @@
 module Counted
-	export Counter, increment!, reset!, @counted
+	export @counted, @tracked, stepcount
 
-	# Counter struct to be passed with the @counted counter function...
-	Base.@kwdef mutable struct Counter
-		count = 0
+	# Allows the closure to replace these template functions.
+	module Inner
+		function stepcount end
+		function increment! end
+		function reset! end
 	end
 
-	# Increment the Counter struct
-	function increment!(counter::Counter)
-		counter.count += 1
-		return counter
+	using .Inner
+
+	# Create a closure that captures a local variable.
+	let counter = Ref(0)
+		function Inner.increment!()
+			counter[] += 1
+			return nothing
+		end
+
+		Inner.stepcount() = counter[]
+
+		function Inner.reset!()
+			counter[] = 0
+			return nothing
+		end
 	end
 
-	# Reset the Counter struct
-	function reset!(counter::Counter)
-		counter.count = 0
-		return counter
+	stepcount = Inner.stepcount
+	increment! = Inner.increment!
+	reset! = Inner.reset!
+
+	macro tracked(func_def)
+		if func_def.head != :function
+			throw(ArgumentError("@tracked is only for function definitions"))
+		end
+
+		func_name, func_body = func_def.args[1], func_def.args[2]
+
+		inserted_code = quote
+			Counted.reset!()
+		end
+
+		if func_body.head == :block
+			# If the body is a block
+			new_body = Expr(:block, inserted_code, func_body.args...)
+		else
+			# If the body is a single expression
+			new_body = Expr(:block, inserted_code, func_body)
+		end
+
+		new_func_def = Expr(:function, func_name, new_body)
+
+		return esc(new_func_def)
 	end
 
 	# Macro to add code to the top of a function that increments the counter
-	macro counted(counter, func_def)
-	    if func_def.head != :function
-	        throw(ArgumentError("@counted is only for function definitions"))
-	    end
+	macro counted(func_def)
+		if func_def.head != :function
+			throw(ArgumentError("@counted is only for function definitions"))
+		end
 
-	    func_name, func_body = func_def.args[1], func_def.args[2]
+		func_name, func_body = func_def.args[1], func_def.args[2]
 
-	    inserted_code = quote
-			increment!($(counter))
-	    end
+		inserted_code = quote
+			Counted.increment!()
+		end
 
-	    if func_body.head == :block
-	        # If the body is a block
-	        new_body = Expr(:block, inserted_code, func_body.args...)
-	    else
-	        # If the body is a single expression
-	        new_body = Expr(:block, inserted_code, func_body)
-	    end
+		if func_body.head == :block
+			# If the body is a block
+			new_body = Expr(:block, inserted_code, func_body.args...)
+		else
+			# If the body is a single expression
+			new_body = Expr(:block, inserted_code, func_body)
+		end
 
-	    new_func_def = Expr(:function, func_name, new_body)
+		new_func_def = Expr(:function, func_name, new_body)
 
-	    return esc(new_func_def)
+		return esc(new_func_def)
 	end
 end

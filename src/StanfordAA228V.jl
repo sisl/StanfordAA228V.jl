@@ -17,12 +17,9 @@ include("Counted.jl")
 using .Counted
 
 export
-    Counter,
-    increment!,
-    reset!,
-    @counted,
+    Counted,
     @tracked,
-    step_counter,
+    stepcount,
     Agent,
     Environment,
     Sensor,
@@ -57,7 +54,6 @@ export
     InterpAgent,
     load_cas_policy
 
-include("counter.jl")
 include("system.jl")
 include("specification.jl")
 include("distributions.jl")

@@ -8,7 +8,7 @@ struct System{A<:Agent, E<:Environment, S<:Sensor}
     sensor::S
 end
 
-@counted step_counter function step(sys::System, s)
+@counted function step(sys::System, s)
     o = sys.sensor(s)
     a = sys.agent(o)
     s′ = sys.env(s, a)
@@ -38,7 +38,7 @@ struct DisturbanceDistribution
     Do # sensor disturbance distribution
 end
 
-@counted step_counter function step(sys::System, s, D::DisturbanceDistribution)
+@counted function step(sys::System, s, D::DisturbanceDistribution)
     xo = rand(D.Do(s))
     o = sys.sensor(s, xo)
     xa = rand(D.Da(o))
@@ -89,7 +89,7 @@ end
 
 Distributions.pdf(p::TrajectoryDistribution, τ) = exp(logpdf(p, τ))
 
-@counted step_counter function step(sys::System, s, x)
+@counted function step(sys::System, s, x)
     o = sys.sensor(s, x.xo)
     a = sys.agent(o, x.xa)
     s′ = sys.env(s, a, x.xs)
