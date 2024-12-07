@@ -9,6 +9,7 @@ Core functionality for Stanford's AA228V/CS238V [_Validation of Safety-Critical 
 
 # Installation
 ```
+] registry add https://github.com/sisl/General.git
 ] add StanfordAA228V
 ```
 
