@@ -19,6 +19,9 @@ using .Counted
 export
     Counted,
     @tracked,
+    @small,
+    @medium,
+    @large,
     stepcount,
     Agent,
     Environment,
