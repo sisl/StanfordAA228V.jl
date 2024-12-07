@@ -1,7 +1,7 @@
 name = "StanfordAA228V"
 uuid = "6f6e590e-f8c2-4a21-9268-94576b9fb3b1"
 authors = ["Robert Moss <rmoss92@gmail.com>"]
-version = "0.1.5"
+version = "0.1.6"
 
 [deps]
 BSON = "fbb218c0-5317-5bc6-957e-2ee96dd4b1f0"

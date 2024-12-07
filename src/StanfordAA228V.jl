@@ -23,6 +23,8 @@ export
     @medium,
     @large,
     stepcount,
+    InvalidSeeders,
+    check_stacktrace_for_invalids,
     Agent,
     Environment,
     Sensor,
