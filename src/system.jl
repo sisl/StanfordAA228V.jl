@@ -26,6 +26,16 @@ function rollout(sys::System; d=1)
     return τ
 end
 
+function rollout(sys::System, s; d)
+	τ = []
+	for t in 1:d
+		o, a, s′ = step(sys, s)
+		push!(τ, (; s, o, a))
+		s = s′
+	end
+	return τ
+end
+
 struct Disturbance
     xa # agent disturbance
     xs # environment disturbance
