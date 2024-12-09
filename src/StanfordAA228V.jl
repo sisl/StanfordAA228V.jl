@@ -31,6 +31,8 @@ export
     System,
     step,
     rollout,
+    mean_step,
+    mean_rollout,
     Disturbance,
     DisturbanceDistribution,
     TrajectoryDistribution,

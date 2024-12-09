@@ -7,6 +7,7 @@ function Distributions.rand(rng::AbstractRNG, d::Deterministic)
     return d.val
 end
 Distributions.logpdf(d::Deterministic, x::T) where T<:Real = zero(x)
+Distributions.mean(d::Deterministic) = d.val
 
 # Bijectors.bijector(d::Deterministic) = identity
 

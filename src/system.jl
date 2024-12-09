@@ -127,3 +127,25 @@ function rollout(sys::System, p::TrajectoryDistribution; d=depth(p))
     end
     return τ
 end
+
+function mean_step(sys::System, s, D::DisturbanceDistribution)
+    xo = mean(D.Do(s))
+    o = sys.sensor(s, xo)
+    xa = mean(D.Da(o))
+    a = sys.agent(o, xa)
+    xs = mean(D.Ds(s, a))
+    s′ = sys.env(s, a, xs)
+    x = Disturbance(xa, xs, xo)
+    return (; o, a, s′, x)
+end
+
+function mean_rollout(sys::System, p::TrajectoryDistribution; d=depth(p))
+    s = mean(initial_state_distribution(p))
+    τ = []
+    for t = 1:d
+        o, a, s′, x = mean_step(sys, s, disturbance_distribution(p, t))
+        push!(τ, (; s, o, a, x))
+        s = s′
+    end
+    return τ
+end
