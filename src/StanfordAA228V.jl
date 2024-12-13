@@ -8,6 +8,9 @@ using Parameters
 using ForwardDiff
 using Optim
 using SignalTemporalLogic
+using AbstractPlutoDingetjes
+using Markdown
+using Base64
 using BSON
 using GridInterpolations
 using Plots
@@ -59,7 +62,37 @@ export
     ProportionalController,
     CollisionAvoidance,
     InterpAgent,
-    load_cas_policy
+    load_cas_policy,
+    get_exported_functions,
+    check_method_extension,
+    Project1,
+    Project2,
+    tmpmodule,
+    process,
+    @include,
+    start_code,
+    end_code,
+    combine_html_md,
+    html_expand,
+    html_space,
+    html_half_space,
+    html_quarter_space,
+    aircraft_vertices,
+    DarkModeIndicator,
+    OpenDirectory,
+    LargeCheckBox,
+    get_aspect_ratio,
+    set_aspect_ratio!,
+    rectangle,
+    circle,
+    halfcircle,
+    rotation,
+    scaled,
+    rotation_from_points,
+    mirror_horizontal,
+    get_version,
+    validate_version,
+    guess_username
 
 include("system.jl")
 include("specification.jl")
@@ -68,5 +101,12 @@ include("set_categorical.jl")
 include("gaussian_system.jl")
 include("inverted_pendulum.jl")
 include("cas.jl")
+include("notebook/backend.jl")
+include("notebook/html.jl")
+include("notebook/aircraft_svg.jl")
+include("notebook/widgets.jl")
+include("notebook/plotting.jl")
+include("notebook/versioning.jl")
+include("notebook/leaderboard.jl")
 
 end # module StanfordAA228V
