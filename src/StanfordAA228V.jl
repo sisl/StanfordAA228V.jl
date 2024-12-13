@@ -92,7 +92,14 @@ export
     mirror_horizontal,
     get_version,
     validate_version,
-    guess_username
+    guess_username,
+    expnum,
+    format,
+    info,
+    hint,
+    almost,
+    keep_working,
+    correct
 
 include("system.jl")
 include("specification.jl")
@@ -108,5 +115,7 @@ include("notebook/widgets.jl")
 include("notebook/plotting.jl")
 include("notebook/versioning.jl")
 include("notebook/leaderboard.jl")
+include("notebook/utils.jl")
+include("notebook/markdown.jl")
 
 end # module StanfordAA228V
