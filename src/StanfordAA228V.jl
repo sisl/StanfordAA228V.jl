@@ -1,5 +1,6 @@
 module StanfordAA228V
 
+using Pkg
 using Distributions
 using Random
 using Statistics
