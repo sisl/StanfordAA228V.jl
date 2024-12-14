@@ -11,7 +11,17 @@ end_code() = html"""
 
 function combine_html_md(contents::Vector; return_html=true)
     process(str) = str isa HTML ? str.content : html(str)
-    return join(map(process, contents))
+    html_string = join(map(process, contents))
+    return return_html ? HTML(html_string) : html_string
+end
+
+wrapdiv(html_or_md; kwargs...) = wrapdiv([html_or_md]; kwargs...)
+function wrapdiv(html_or_md::Vector; options="", return_html=true)
+    return combine_html_md([HTML("<div $options>"), html_or_md, html"</div>"]; return_html)
+end
+
+function highlight(html_or_md; options="")
+    return wrapdiv(html_or_md; options="class='highlight'$options")
 end
 
 function html_expand(title, content::Markdown.MD)
