@@ -38,3 +38,8 @@ struct ProportionalController <: Agent
 end
 
 (c::ProportionalController)(s, a=missing) = c.k' * s
+
+const Project1MediumSystem::Type = System{ProportionalController, InvertedPendulum, AdditiveNoiseSensor}
+const Project2MediumSystem::Type = Project1MediumSystem
+
+get_depth(sys::Project1MediumSystem) = 41

@@ -17,8 +17,8 @@ end
 
 Base.get(checkbox::DarkModeIndicator) = checkbox.default
 Bonds.initial_value(b::DarkModeIndicator) = b.default
-Bonds.possible_values(b::DarkModeIndicator) = [false, true]
-Bonds.validate_value(b::DarkModeIndicator, val) = val isa Bool
+Bonds.possible_values(::DarkModeIndicator) = [false, true]
+Bonds.validate_value(::DarkModeIndicator, val) = val isa Bool
 
 
 struct OpenDirectory
@@ -53,8 +53,8 @@ end
 
 Base.get(checkbox::OpenDirectory) = checkbox.default
 Bonds.initial_value(b::OpenDirectory) = b.default
-Bonds.possible_values(b::OpenDirectory) = [false, true]
-Bonds.validate_value(b::OpenDirectory, val) = val isa Bool
+Bonds.possible_values(::OpenDirectory) = [false, true]
+Bonds.validate_value(::OpenDirectory, val) = val isa Bool
 
 
 struct LargeCheckBox
@@ -70,5 +70,5 @@ end
 
 Base.get(checkbox::LargeCheckBox) = checkbox.default
 Bonds.initial_value(b::LargeCheckBox) = b.default
-Bonds.possible_values(b::LargeCheckBox) = [false, true]
-Bonds.validate_value(b::LargeCheckBox, val) = val isa Bool
+Bonds.possible_values(::LargeCheckBox) = [false, true]
+Bonds.validate_value(::LargeCheckBox, val) = val isa Bool

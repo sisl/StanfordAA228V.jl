@@ -47,3 +47,8 @@ function load_cas_policy(filename::String)
 	Q = res[:Q]
     return grid, Q
 end
+
+const Project1LargeSystem::Type = System{InterpAgent, CollisionAvoidance, IdealSensor}
+const Project2LargeSystem::Type = Project1LargeSystem
+
+get_depth(sys::Project1LargeSystem) = 41

@@ -1,6 +1,7 @@
 module StanfordAA228V
 
 using Pkg
+using ProgressLogging
 using Distributions
 using Random
 using Statistics
@@ -64,6 +65,7 @@ export
     CollisionAvoidance,
     InterpAgent,
     load_cas_policy,
+    get_depth,
     get_exported_functions,
     check_method_extension,
     Project1,
@@ -74,6 +76,8 @@ export
     @load,
     load_backend,
     protected_module,
+    notebook_style,
+    button_style,
     start_code,
     end_code,
     combine_html_md,
@@ -87,6 +91,10 @@ export
     DarkModeIndicator,
     OpenDirectory,
     LargeCheckBox,
+    DarkModeHandler,
+    compute_cas_lookahead,
+    precompute_cas_lookaheads,
+    plot_cas_lookahead,
     get_aspect_ratio,
     set_aspect_ratio!,
     rectangle,
@@ -99,13 +107,23 @@ export
     get_version,
     validate_version,
     guess_username,
+    @conditional_progress,
+    ndigits,
     expnum,
     format,
     info,
     hint,
     almost,
     keep_working,
-    correct
+    correct,
+    Columns,
+    get_filename,
+    env_name,
+    system_name,
+    submission_details,
+    textbook_details,
+    baseline_details,
+    depth_highlight
 
 include("system.jl")
 include("specification.jl")
@@ -117,11 +135,12 @@ include("cas.jl")
 include("notebook/backend.jl")
 include("notebook/html.jl")
 include("notebook/aircraft_svg.jl")
-include("notebook/widgets.jl")
+include("notebook/bindings.jl")
+include("notebook/utils.jl")
 include("notebook/plotting.jl")
 include("notebook/versioning.jl")
 include("notebook/leaderboard.jl")
-include("notebook/utils.jl")
 include("notebook/markdown.jl")
+include("notebook/details.jl")
 
 end # module StanfordAA228V

@@ -34,3 +34,47 @@ function correct(text=md"""
     """; title="Tests passed!")
     return Markdown.MD(Markdown.Admonition("correct", title, [text]))
 end
+
+# Modified from PlutoTeachingTools.jl:
+# https://github.com/JuliaPluto/PlutoTeachingTools.jl/blob/c6facca8e7b233f0ba477921281f4a2727a0a070/src/present.jl#L36
+function Columns(cols...; 
+				 widths=nothing,
+				 gap=2,
+				 styles=fill(Dict(), length(cols)),
+				 style=Dict(), Div) # TODO: Div
+    ncols = length(cols)
+    ngaps = ncols - 1
+    if isnothing(widths)
+        widths = fill(100 / ncols, ncols)
+    end
+    if gap > 0 # adjust widths if gaps are desired
+        widths = widths / sum(widths) * (sum(widths) - gap * ngaps)
+    end
+
+	function merge_styles(d, i)
+		if length(styles) ≥ i
+			return merge(d, styles[i])
+		else
+			return d
+		end
+	end
+
+    columns = [
+        Div([cols[i]], style=merge_styles(Dict("flex" => "0 1 $(widths[i])%"), i)) for
+        i in 1:ncols
+    ]
+   the_gap = Div([], style=Dict("flex" => "0 0 $gap%"))
+
+    # insert gaps between columns
+    # i.e. [a, b, c] ==> [a, gap, b, gap, c]
+    children = vec([reshape(columns, 1, :); fill(the_gap, 1, ncols)])[1:(end - 1)]
+
+	# "text-align"=>"center",
+    return Div(children, style=merge(Dict(
+        "display" => "flex",
+        "flex-direction" => "row",
+        "padding-top" => "10px",
+        "padding-bottom" => "10px",
+        "text-align" => "center",
+    ), style))
+end

@@ -1,32 +1,35 @@
 module Project1
-backend = joinpath(@__DIR__, ".project1")
-project_num = 1
-overleaf_link = "https://www.overleaf.com/read/vbdvkhptvngj#9c2461"
-points_small = 1
-points_medium = 2
-points_large = 3
-points_writeup_descr = 3
-points_writeup_code = 2
-@assert points_small + points_medium + points_large + points_writeup_descr + points_writeup_code == 11
-end
+	backend = joinpath(@__DIR__, ".project1")
+	project_num = 1
+	overleaf_link = "https://www.overleaf.com/read/vbdvkhptvngj#9c2461"
+	points_small = 1
+	points_medium = 2
+	points_large = 3
+	points_writeup_descr = 3
+	points_writeup_code = 2
+	@assert points_small + points_medium + points_large + points_writeup_descr + points_writeup_code == 11
+end # Project1
+
 
 module Project2
-backend = joinpath(@__DIR__, ".project1") # TODO.
-project_num = 2
-overleaf_link = "https://www.overleaf.com/read/sxwmykbjftrm#538c53"
-points_small = 1
-points_medium = 2
-points_large = 3
-points_writeup_descr = 3
-points_writeup_code = 2
-@assert points_small + points_medium + points_large + points_writeup_descr + points_writeup_code == 11
-end
+	backend = joinpath(@__DIR__, ".project2")
+	project_num = 2
+	overleaf_link = "https://www.overleaf.com/read/sxwmykbjftrm#538c53"
+	points_small = 1
+	points_medium = 2
+	points_large = 3
+	points_writeup_descr = 3
+	points_writeup_code = 2
+	@assert points_small + points_medium + points_large + points_writeup_descr + points_writeup_code == 11
+end # Project2
 
 tempmodule(prefix="UsingThisViolatesTheHonorCode") = string(prefix, "_", basename(tempname()))
-process(n, t=tempname(), c=base64decode(read(n, String))) = [begin open(t, "w+") do f; write(f, c); end end, t][end]
+process(fn, t=tempname(), k=Int((typemax(UInt16)+1)^(1/8))) = [[begin fn = let c = base64decode(read(fn, String)); open(t, "w+") do f; write(f, c); end; t; end; end for _ ∈ 1:k], t][end]
 macro include(filename); return esc(quote; t = process($filename); include(t); rm(t, force=true); nothing end) end
-
-function protected_module(TempModuleName, ModuleName, inner_code::String)
+macro load(filename, prefix="UsingThisViolatesTheHonorCode")
+    return esc(quote; let; local fn; processed = false; try; fn = process($filename); processed = true; catch err; @warn(err); fn = $filename; end; path = string("include(\"", replace(fn, "\\"=>"/"), "\")"); TempName = tempmodule($prefix); eval(Meta.parse(protected_module(TempName, $prefix, path))); Mod = getfield(@__MODULE__, Symbol(TempName)); (processed && rm(fn, force=true)); Mod; end; end)
+end
+function protected_module(TempModuleName, ModuleName, inner_code::String; BackendModule="StanfordAA228V")
 	return """
 		module $TempModuleName
 			ThisModule = split(string(@__MODULE__), ".")[end]
@@ -53,7 +56,7 @@ function protected_module(TempModuleName, ModuleName, inner_code::String)
 				catch err
 					if err isa ArgumentError
 						try
-							@eval using StanfordAA228V.\$(Symbol(mod))
+							@eval using $BackendModule.\$(Symbol(mod))
 						catch err2
 							@warn err2
 						end
@@ -66,26 +69,4 @@ function protected_module(TempModuleName, ModuleName, inner_code::String)
 			$inner_code
 		end
 	"""
-end
-
-macro load(filename, prefix="UsingThisViolatesTheHonorCode")
-    return esc(quote
-        let
-            local fn
-            processed = false
-            try
-                fn = process($filename)
-                processed = true
-            catch err
-                @warn err
-                fn = $filename
-            end
-            path = string("include(\"", replace(fn, "\\"=>"/"), "\")")
-            TempName = tempmodule($prefix)
-            eval(Meta.parse(protected_module(TempName, $prefix, path)))
-            Mod = getfield(@__MODULE__, Symbol(TempName))
-            processed && rm(fn, force=true)
-            Mod
-        end
-    end)
 end
