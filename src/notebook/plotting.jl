@@ -14,6 +14,73 @@ using .DarkModeHandler
 global PASTEL_RED = "#F5615C"
 global PASTEL_GREEN = "#009E73"
 global DARK_MODE_BACKGROUND = "#1A1A1A"
+global LIGHT_MODE_BACKGROUND = "#FFFFFF"
+
+function dark_mode_plot(is_dark_mode=false; bghexalpha="", hold=false, kwargs...)
+    bgcolor = is_dark_mode ? string(DARK_MODE_BACKGROUND, bghexalpha) : string(LIGHT_MODE_BACKGROUND, bghexalpha)
+    _plot = hold ? plot! : plot
+    _plot(;
+        bg="transparent",
+        background_color_inside=bgcolor,
+        bglegend=bgcolor,
+        fg=is_dark_mode ? "white" : "black",
+        gridalpha=is_dark_mode ? 0.5 : 0.1,
+        kwargs...
+    )
+end
+
+function plot_pfail_histogram(sys, ψ, 𝐏;
+                               f_truth::Function,
+                               baseline::Float64,
+                               is_dark_mode=DarkModeHandler.getdarkmode())
+    dark_mode_plot(is_dark_mode;
+        bghexalpha="66",
+        legend_foreground_color=:black,
+		foreground_color_border=:black,
+		foreground_color_axis=:black,
+        gridalpha=0.1,
+    )
+
+	histogram!(𝐏;
+		size=(400,250),
+		xlabel="""
+		
+		\$\\hat{P}_\\mathrm{fail}\$ estimates""",
+		ylabel="frequency\n",
+        titlefontsize=10,
+		labelfontsize=8,
+		tickfontsize=6,
+		legendfontsize=6,
+		label=false,
+		color=:lightgray,
+		linecolor=:black,
+		rightmargin=8Plots.mm,
+		leftmargin=0Plots.mm,
+		bottommargin=-5Plots.mm,
+		topmargin=0Plots.mm,
+		legend=:topright,
+	)
+	vline!([f_truth(sys, ψ)];
+		color=:crimson,
+		label="truth",
+		lw=2,
+	)
+	vline!([baseline];
+		color="#017E7C",
+		label="baseline",
+		lw=2,
+		ls=:dashdot,
+	)
+	vline!([mean(𝐏)];
+		color="#FEC51D",
+		label="mean estimate",
+		lw=2,
+		ls=:dash,
+	)
+	# every_other_xtick!()
+	ylims!(0, ylims()[2]*1.05)
+	set_aspect_ratio!()
+end
 
 ########################################
 ## SmallSystem: Projects 1 & 2
@@ -22,23 +89,18 @@ global DARK_MODE_BACKGROUND = "#1A1A1A"
 
 function Plots.plot(sys::Project1SmallSystem, ψ, τ=missing;
 					is_dark_mode=DarkModeHandler.getdarkmode(),
-                    max_points=500, kwargs...)
+                    max_points=500, bghexalpha="",
+                    kwargs...)
 	ps = Ps(sys.env)
 
-	plot(
-		bg="transparent",
-		background_color_inside=is_dark_mode ? DARK_MODE_BACKGROUND : "white",
-		bglegend=is_dark_mode ? DARK_MODE_BACKGROUND : "white",
-		fg=is_dark_mode ? "white" : "black",
-		gridalpha=is_dark_mode ? 0.5 : 0.1,
-	)
+    dark_mode_plot(is_dark_mode; bghexalpha)
 
 	# Create a range of x values
 	_X = range(-4, 4, length=1000)
 	_Y = pdf.(ps, _X)
 
 	# Plot the Gaussian density
-	plot!(_X, _Y,
+	plot!(_X, _Y;
 	     xlim=(-4, 4),
 	     ylim=(-0.001, 0.41),
 	     linecolor=is_dark_mode ? "white" : "black",
@@ -47,7 +109,8 @@ function Plots.plot(sys::Project1SmallSystem, ψ, τ=missing;
 	     xlabel="state \$s\$",
 	     ylabel="density \$p(s)\$",
 	     size=(600, 300),
-	     label=false)
+	     label=false,
+         kwargs...)
 
 	# Identify the indices where x ≤ c or x ≥ c
 	c = ψ.formula.ϕ.c
@@ -77,8 +140,7 @@ function Plots.plot(sys::Project1SmallSystem, ψ, τ=missing;
 	      label=false)
 
 	# Draw failure threshold
-	vline!([c];
-		   color="crimson", legend=:topleft, label="Failure threshold")
+	vline!([c]; color="crimson", legend=:topleft, label="Failure threshold")
 
 	if !ismissing(τ)
 		count_plotted_succeses = 0
@@ -123,12 +185,7 @@ end
 function plot_cdf(sys::Project1SmallSystem, ψ; is_dark_mode=DarkModeHandler.getdarkmode())
 	ps = Ps(sys.env)
 
-	plot(
-		bg="transparent",
-		background_color_inside=is_dark_mode ? DARK_MODE_BACKGROUND : "white",
-		bglegend=is_dark_mode ? DARK_MODE_BACKGROUND : "white",
-		fg=is_dark_mode ? "white" : "black",
-		gridalpha=is_dark_mode ? 0.5 : 0.1,
+    dark_mode_plot(is_dark_mode;
 		xlim=(-4, 4),
 		ylim=(-0.001, 1.05),
 		linecolor=is_dark_mode ? "white" : "black",
@@ -193,14 +250,8 @@ function Plots.plot(sys::Project1MediumSystem, ψ, τ=missing;
                     is_dark_mode=DarkModeHandler.getdarkmode(),
 					title="Inverted Pendulum",
 					max_lines=100, size=(680,350), kwargs...)
-	plot(
-		size=size,
-		grid=false,
-		bg="transparent",
-		background_color_inside=is_dark_mode ? DARK_MODE_BACKGROUND : "white",
-		fg=is_dark_mode ? "white" : "black",
-	)
 
+    dark_mode_plot(is_dark_mode; size, grid=false)
 	plot!(rectangle(2, 1, 0, π/4), opacity=0.5, color=PASTEL_RED, label=false)
 	plot!(rectangle(2, 1, 0, -π/4-1), opacity=0.5, color=PASTEL_RED, label=false)
 	xlabel!("Time (s)")
@@ -241,15 +292,12 @@ end
 
 
 function plot_pendulum(θ; c=π/4, is_dark_mode=DarkModeHandler.getdarkmode(), title="", kwargs...)
-	plot(;
-		grid=false,
-		axis=false,
-		bg="transparent",
-		background_color_inside="transparent",
-		fgcolor=is_dark_mode ? "white" : "black",
-		title=title,
-		kwargs...
-	)
+    dark_mode_plot(is_dark_mode;
+        grid=false,
+        axis=false,
+        title=title,
+        kwargs...
+    )
 	l = 3 # Pendulum length
 	buffer = 1.05 # Axis limit buffer
 	lt = 1.1l # Failure threshold length
@@ -296,13 +344,11 @@ function Plots.plot(sys::Project1LargeSystem, ψ, τ=missing;
                     is_dark_mode=DarkModeHandler.getdarkmode(),
                     t=missing, max_lines=100, max_lines_include_failure=false,
                     flw=2, fα=1, sα=0.25, slw=1, size=(680,350), title="", hold=false, kwargs...)
-    _plot = hold ? plot! : plot
-    _plot(;
+
+    dark_mode_plot(is_dark_mode;
+        hold,
         size,
         grid=false,
-        bg="transparent",
-        background_color_inside=is_dark_mode ? DARK_MODE_BACKGROUND : "white",
-        fg=is_dark_mode ? "white" : DARK_MODE_BACKGROUND,
         xflip=true,
         kwargs...
     )
@@ -493,7 +539,8 @@ function plot_cas_lookahead(sys::Project1LargeSystem, ψ;
             py = pfails[1:t]
             pvar = pfails_var[1:t]
             fail_color = PASTEL_RED
-            plot(px, py;
+            dark_mode_plot(is_dark_mode)
+            plot!(px, py;
                 ribbon=pvar,
                 fillcolor=fail_color,
                 fillalpha=0.1,
@@ -502,9 +549,6 @@ function plot_cas_lookahead(sys::Project1LargeSystem, ψ;
                 label=false,
                 size=(680,350),
                 grid=false,
-                bg="transparent",
-                background_color_inside=is_dark_mode ? DARK_MODE_BACKGROUND : "white",
-                fg=is_dark_mode ? "white" : "black",
                 xflip=true,
                 titlefontsize=12,
                 xlims=(0, 40),
@@ -538,6 +582,11 @@ end
 function set_aspect_ratio!()
     ratio = get_aspect_ratio()
     plot!(ratio=ratio)
+end
+
+function every_other_xtick!()
+	xtick_values, xtick_labels = xticks(plot!())[1]
+	xticks!(plot!(), xtick_values[1:2:end], xtick_labels[1:2:end])
 end
 
 rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])

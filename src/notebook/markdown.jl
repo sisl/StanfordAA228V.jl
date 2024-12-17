@@ -12,8 +12,8 @@ function almost(text=md"""
     Please modify the `num_failures` function (currently returning `nothing`, which is the default).
 
     (Please only submit when this is **green**.)
-    """)
-    return Markdown.MD(Markdown.Admonition("warning", "Warning!", [text]))
+    """; title="Warning!")
+    return Markdown.MD(Markdown.Admonition("warning", title, [text]))
 end
 
 
