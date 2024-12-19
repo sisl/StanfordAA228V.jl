@@ -150,7 +150,7 @@ function Plots.plot(sys::Project1SmallSystem, ψ, τ=missing;
 				label = "Failure state"
 				count_plotted_failures += 1
 			elseif !isfailure(ψ, τᵢ) && count_plotted_succeses == 0
-				label = "Succes state"
+				label = "Success state"
 				count_plotted_succeses += 1
 			else
 				label = false
@@ -209,34 +209,14 @@ function plot_cdf(sys::Project1SmallSystem, ψ; is_dark_mode=DarkModeHandler.get
 	      label=false, color=primary_color)
 
 	c = ψ.formula.ϕ.c
-
-	# Extract the x and y values for the region to fill
-	idx = _X .≤ ψ.formula.ϕ.c
-	x_fill = _X[idx]
-	y_fill = _Y[idx]
-
-	# Create the coordinates for the filled polygon
-	# Start with the x and y values where x <= -2
-	# Then add the same x values in reverse with y = 0 to close the polygon
-	polygon_x = vcat(x_fill, reverse(x_fill))
-	polygon_y = vcat(y_fill, zeros(length(y_fill)))
-
 	Pc = cdf(ps, ψ.formula.ϕ.c)
 
-	# Add the filled area to the plot
-	plot!(polygon_x, polygon_y,
-	      fill=true,
-	      fillcolor="crimson",
-	      linecolor="transparent", # No border for the filled area
-		  lw=0,
-		  alpha=0.5,
-	      label="\$P(s < $c) \\ ≈ \\ $(round(Pc; digits=4)) \$",
-		  legend=:topleft)
-
 	plot!([c, c], [0, Pc];
-		   ls=:dash, color=dash_color, label=false)
+        ls=:dash, color=dash_color, label=false)
 	plot!([-4, c], fill(Pc, 2);
-		   ls=:dash, color=dash_color, label=false)
+        ls=:dash, color=dash_color, label=false)
+    scatter!([c], [Pc];
+        color=dash_color, label=false, ms=3)
 
 	return plot!()
 end
@@ -296,26 +276,28 @@ function plot_pendulum(θ; c=π/4, is_dark_mode=DarkModeHandler.getdarkmode(), t
         grid=false,
         axis=false,
         title=title,
+		background_color_inside=:transparent,
         kwargs...
     )
 	l = 3 # Pendulum length
+	r = l/3
 	buffer = 1.05 # Axis limit buffer
-	lt = 1.1l # Failure threshold length
+	lt = 1.1r # Failure threshold length
 
 	xlims!(-l*buffer, l*buffer)
 	ylims!(-l*buffer, l*buffer)
 	set_aspect_ratio!()
 
 	# Background circle
-	plot!(circle([0,0], l), seriestype=:shape, color="#b9e2d5", lc="transparent", label=false)
+	plot!(circle([0,0], r), seriestype=:shape, color="#b9e2d5", lc="transparent", label=false)
 
 	# Failure regions
-	plot!(halfcircle([0,0], l, c), seriestype=:shape, color="#fbdfdc", lc="transparent", label=false)
+	plot!(halfcircle([0,0], r, c), seriestype=:shape, color="#fbdfdc", lc="transparent", label=false)
 
-	plot!(halfcircle([0,0], l, -c), seriestype=:shape, color="#fbdfdc", lc="transparent", label=false)
+	plot!(halfcircle([0,0], r, -c), seriestype=:shape, color="#fbdfdc", lc="transparent", label=false)
 
 	# Outline
-	plot!(circle([0,0], l), seriestype=:shape, color="transparent", lc="transparent", label=false)
+	plot!(circle([0,0], r), seriestype=:shape, color="transparent", lc="transparent", label=false)
 
 	# Failure thresholds
 	plot!([0, lt*sin(c)], [0, lt*cos(c)], color="#F5615C", ls=:dash, lw=2, label=false)
@@ -326,7 +308,7 @@ function plot_pendulum(θ; c=π/4, is_dark_mode=DarkModeHandler.getdarkmode(), t
 	topx = l * sind(θ)
 	topy = l * cosd(θ)
 
-	pend_color = θ < -rad2deg(c) || θ > rad2deg(c) ? "#F5615C" : "black"
+	pend_color = θ < -rad2deg(c) || θ > rad2deg(c) ? "#F5615C" : "#417865"
 	plot!([0, topx], [0, topy], lw=3, color=pend_color, label=false)
 	
 	# Center point

@@ -40,7 +40,7 @@ function expnum(num::Float64; sigdigits=100)
 end
 
 
-function format(n::Integer; latex=false)
+function format(n::Integer; latex=true)
     s = string(abs(n))
     rev_s = reverse(s)
     chunks = [rev_s[i:min(i+2, end)] for i in 1:3:length(rev_s)]
