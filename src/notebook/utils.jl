@@ -29,7 +29,7 @@ end
 
 function expnum(num::Float64; sigdigits=100)
     num = round(num; sigdigits)
-    m = match(r"(\d\.*\d+)e(-*\d+)", string(num))
+    m = match(r"(-*\d\.*\d+)e(-*\d+)", string(num))
     if isnothing(m)
         return num
     else
