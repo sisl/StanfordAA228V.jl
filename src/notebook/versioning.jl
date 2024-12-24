@@ -38,6 +38,7 @@ function validate_version(pkg::Module)
 			end
 			return current_version == latest_version
 		catch err
+			@warn err
 			return true
 		end
 	end

@@ -1,6 +1,8 @@
 module StanfordAA228V
 
 using Pkg
+using TOML
+using Downloads
 using ProgressLogging
 using Distributions
 using Random

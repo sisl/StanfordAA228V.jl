@@ -117,6 +117,16 @@ function rollout(sys::System, s, 𝐱; d=length(𝐱))
     return τ
 end
 
+function rollout(sys::System, s, p::TrajectoryDistribution; d=depth(p))
+    τ = []
+    for t = 1:d
+        o, a, s′, x = step(sys, s, disturbance_distribution(p, t))
+        push!(τ, (; s, o, a, x))
+        s = s′
+    end
+    return τ
+end
+
 function rollout(sys::System, p::TrajectoryDistribution; d=depth(p))
     s = rand(initial_state_distribution(p))
     τ = []
