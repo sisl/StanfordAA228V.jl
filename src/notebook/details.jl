@@ -9,7 +9,7 @@ function submission_details(bind_directory_trigger, Project, system_types::Vecto
 
     Markdown.MD(HTML("<h2 id='submission'>Submission</h2>"),
 	Markdown.parse("""
-	You will submit **three** results files (`.val`) and **this file** (`project$(project_num).jl`) to the **`"Project $project_num (.val files + .jl file)"`** Gradescope assignment and **include the PDF** in your write up in the **"`Project $project_num (write up)`"** Gradescope assignment (see below).
+	You will submit **three** results files (`.val`) and **this file** (`project$(project_num).jl`) to the **`"Project $project_num (.val files + .jl file"`** Gradescope assignment and **include the PDF** in your write up in the **"`Project $project_num (write up)`"** Gradescope assignment (see below).
 	"""),
 	Markdown.parse("""
 	1. **Gradescope assignment `"Project $project_num (.val files + .jl file)"`** (total $(points_small + points_medium + points_large) points):
@@ -21,7 +21,6 @@ function submission_details(bind_directory_trigger, Project, system_types::Vecto
 	    - Description of algorithms ($points_writeup_descr points)
 	    - PDF of Pluto notebook ($points_writeup_code points)
 
-
 	_The_ `.val` _files will be automatically saved for you in the same directory as this notebook:_
 	"""),
 	md"""
@@ -29,8 +28,6 @@ function submission_details(bind_directory_trigger, Project, system_types::Vecto
 	    - ↑ Click to open directory.
 	""",
 	Markdown.parse("""
-	**Note**: You do _not_ have to submit the `project$project_num.jl` file.
-
 	### Algorithm write up
 	Include a PDF write up describing the algorithms you used to solve the three problems. Include the notebook PDF. This should not be more than 1 to 2 pages (excluding the PDF of the notebook code).
 
