@@ -13,6 +13,8 @@ using .DarkModeHandler
 
 global PASTEL_RED = "#F5615C"
 global PASTEL_GREEN = "#009E73"
+global PASTEL_SKY_BLUE = "#56B4E9"
+global PASTEL_PURPLE = "#8770FE"
 global DARK_MODE_BACKGROUND = "#1A1A1A"
 global LIGHT_MODE_BACKGROUND = "#FFFFFF"
 

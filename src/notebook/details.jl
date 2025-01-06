@@ -41,6 +41,7 @@ function submission_details(bind_directory_trigger, Project, system_types::Vecto
 
 	Include the **`project$project_num.pdf`** in your write-up:
 	-  \$\\LaTeX\$ Overleaf template: [`$overleaf_link`]($overleaf_link)
+	    - Click "Menu" → "Copy Project"
 	    - **Note**: You do _not_ have to use the template or \$\\LaTeX\$.
 
 	If you encounter issues, [please ask us on Ed](https://edstem.org/us/courses/69226/discussion).

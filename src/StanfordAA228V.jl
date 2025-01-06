@@ -109,6 +109,7 @@ export
     mirror_horizontal,
     get_version,
     validate_version,
+    validate_project_version,
     guess_username,
     @conditional_progress,
     ndigits,

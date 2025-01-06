@@ -43,3 +43,21 @@ function validate_version(pkg::Module)
 		end
 	end
 end
+
+function validate_project_version(project_dir; github_path="sisl/AA228VProjects")
+	if haskey(ENV, "JL_SKIP_228V_UPDATE_CHECK")
+		# Skip for Gradescope
+		return true
+	else
+		try
+			current_version = read(joinpath(project_dir, ".version"), String)
+			version_url =
+				"https://raw.githubusercontent.com/$github_path/refs/heads/main/$(basename(project_dir))/.version"
+			latest_version = read(Downloads.download(version_url), String)
+			return current_version == latest_version
+		catch err
+			@warn err
+			return true
+		end
+	end
+end
