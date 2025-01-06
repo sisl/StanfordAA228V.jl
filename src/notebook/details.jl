@@ -9,10 +9,11 @@ function submission_details(bind_directory_trigger, Project, system_types::Vecto
 
     Markdown.MD(HTML("<h2 id='submission'>Submission</h2>"),
 	Markdown.parse("""
-	You will submit **three** results files (`.val`) to the **`"Project $project_num (.val files)"`** Gradescope assignment and **include the PDF** in your write up in the **"`Project $project_num (write up)`"** Gradescope assignment (see below).
+	You will submit **three** results files (`.val`) and **this file** (`project$(project_num).jl`) to the **`"Project $project_num (.val files + .jl file)"`** Gradescope assignment and **include the PDF** in your write up in the **"`Project $project_num (write up)`"** Gradescope assignment (see below).
 	"""),
 	Markdown.parse("""
-	1. **Gradescope assignment `"Project $project_num (.val files)"`** (total $(points_small + points_medium + points_large) points):
+	1. **Gradescope assignment `"Project $project_num (.val files + .jl file)"`** (total $(points_small + points_medium + points_large) points):
+	    1. `project$(project_num).jl` (0 points)
 	    1. `$(get_filename(system_types[1], Project))` ($points_small points)
 	    1. `$(get_filename(system_types[2], Project))` ($points_medium points)
 	    1. `$(get_filename(system_types[3], Project))` ($points_large points)
