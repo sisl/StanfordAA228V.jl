@@ -46,7 +46,7 @@ function plot_pfail_histogram(sys, ψ, 𝐏;
 	histogram!(𝐏;
 		size=(400,250),
 		xlabel="""
-		
+
 		\$\\hat{P}_\\mathrm{fail}\$ estimates""",
 		ylabel="frequency\n",
         titlefontsize=10,
@@ -86,7 +86,7 @@ end
 
 ########################################
 ## SmallSystem: Projects 1 & 2
-##     Simple Gaussian 
+##     Simple Gaussian
 ########################################
 
 function Plots.plot(sys::Project1SmallSystem, ψ, τ=missing;
@@ -116,7 +116,7 @@ function Plots.plot(sys::Project1SmallSystem, ψ, τ=missing;
 
 	# Identify the indices where x ≤ c or x ≥ c
 	c = ψ.formula.ϕ.c
-	
+
 	if ψ.formula.ϕ isa Predicate
 		idx = _X .≤ c
 	else
@@ -204,7 +204,7 @@ function plot_cdf(sys::Project1SmallSystem, ψ; is_dark_mode=DarkModeHandler.get
 	_X = range(-4, 4, length=1000)
 	_Y = cdf.(ps, _X)
 
-	plot!(_X, _Y; 
+	plot!(_X, _Y;
 		  linecolor=is_dark_mode ? "white" : "black",
 		  fillcolor=is_dark_mode ? "darkgray" : "lightgray",
 		  fill=true,
@@ -312,7 +312,7 @@ function plot_pendulum(θ; c=π/4, is_dark_mode=DarkModeHandler.getdarkmode(), t
 
 	pend_color = θ < -rad2deg(c) || θ > rad2deg(c) ? "#F5615C" : "#417865"
 	plot!([0, topx], [0, topy], lw=3, color=pend_color, label=false)
-	
+
 	# Center point
 	scatter!([0], [0], marker=:circle, ms=5, color="black", label=false)
 end

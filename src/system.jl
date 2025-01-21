@@ -8,7 +8,7 @@ struct System{A<:Agent, E<:Environment, S<:Sensor}
     sensor::S
 end
 
-@counted function step(sys::System, s)
+@counted function Base.step(sys::System, s)
     o = sys.sensor(s)
     a = sys.agent(o)
     s′ = sys.env(s, a)
@@ -48,7 +48,7 @@ struct DisturbanceDistribution
     Do # sensor disturbance distribution
 end
 
-@counted function step(sys::System, s, D::DisturbanceDistribution)
+@counted function Base.step(sys::System, s, D::DisturbanceDistribution)
     xo = rand(D.Do(s))
     o = sys.sensor(s, xo)
     xa = rand(D.Da(o))
@@ -59,10 +59,27 @@ end
     return (; o, a, s′, x)
 end
 
+function Distributions.fit(d::DisturbanceDistribution, samples, w)
+    𝐱_agent = [s.x.x_agent for s in samples]
+    𝐱_env = [s.x.x_env for s in samples]
+    𝐱_sensor = [s.x.x_sensor for s in samples]
+    px_agent = fit(d.px_agent, 𝐱_agent, w)
+    px_env = fit(d.px_env, 𝐱_env, w)
+    px_sensor = fit(d.px_sensor, 𝐱_sensor, w)
+    return DisturbanceDistribution(px_agent, px_env, px_sensor)
+end
+
+Distributions.fit(𝐝::Vector, samples, w) = [fit(d, [s[t] for s in samples], w) for (t, d) in enumerate(𝐝)]
+
+Distributions.fit(d::Sampleable, samples, w::Missing) = fit(typeof(d), samples)
+Distributions.fit(d::Sampleable, samples, w) = fit_mle(typeof(d), samples, w)
+
 abstract type TrajectoryDistribution end
 function initial_state_distribution(p::TrajectoryDistribution) end
 function disturbance_distribution(p::TrajectoryDistribution, t) end
 function depth(p::TrajectoryDistribution) end
+
+(p::TrajectoryDistribution)(τ) = pdf(p, τ)
 
 struct NominalTrajectoryDistribution <: TrajectoryDistribution
     Ps # initial state distribution
@@ -99,7 +116,7 @@ end
 
 Distributions.pdf(p::TrajectoryDistribution, τ) = exp(logpdf(p, τ))
 
-@counted function step(sys::System, s, x)
+@counted function Base.step(sys::System, s, x)
     o = sys.sensor(s, x.xo)
     a = sys.agent(o, x.xa)
     s′ = sys.env(s, a, x.xs)

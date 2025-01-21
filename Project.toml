@@ -1,7 +1,7 @@
 name = "StanfordAA228V"
 uuid = "6f6e590e-f8c2-4a21-9268-94576b9fb3b1"
 authors = ["Robert Moss <rmoss92@gmail.com>"]
-version = "0.1.22"
+version = "0.1.23"
 
 [deps]
 AbstractPlutoDingetjes = "6e696c72-6542-2067-7265-42206c756150"
