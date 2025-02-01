@@ -17,7 +17,10 @@ using Markdown
 using Base64
 using BSON
 using GridInterpolations
+using LazySets
 using Plots
+import Interpolations: interpolate as interpolate_spline, CardinalMonotonicInterpolation
+import Distances: Euclidean
 # import Bijectors: bijector
 
 include("Counted.jl")
@@ -63,15 +66,22 @@ export
     robustness,
     InvertedPendulum,
     AdditiveNoiseSensor,
+    Os,
     ProportionalController,
+    Πo,
     CollisionAvoidance,
     InterpAgent,
     load_cas_policy,
     get_depth,
+    MassSpringDamper,
+    Ts,
+    Ta,
+    𝒮₁,
     get_exported_functions,
     check_method_extension,
     Project1,
     Project2,
+    Project3,
     tempmodule,
     process,
     @include,
@@ -127,15 +137,51 @@ export
     submission_details,
     textbook_details,
     baseline_details,
-    depth_highlight
+    depth_highlight,
+    AvoidSetSpecification,
+    ¬,
+    disturbance_set,
+    subset_vertices,
+    extract_set,
+    count_vertices,
+    fan_sets,
+    plot_optimal,
+    plot_msd_time_axis,
+    plot_msd_traj!,
+    plot_pendulum_state,
+    plot_pendulum_solution,
+    plot_pendulum_solution!,
+    ContinuumWorld,
+    load_cw_policy,
+    ContinuumWorldSurrogate,
+    NeuralNetworkAgent,
+    plot_cw_trajectory!,
+    cw_success_and_failure,
+    cw_generate_trajectory,
+    SetCategorical,
+    plotsamples!,
+    plotoutsiders!,
+    plotting_vertices,
+    compute_volume,
+    plotset,
+    plotset!,
+    bounded_set,
+    bounded_wrapper,
+    precompute_soundness_and_outsiders,
+    plot_cw_full_reachability,
+    plot_cw_reachability
 
 include("system.jl")
 include("specification.jl")
 include("distributions.jl")
 include("set_categorical.jl")
+include("reachability.jl")
 include("gaussian_system.jl")
 include("inverted_pendulum.jl")
 include("cas.jl")
+include("mass_spring_damper.jl")
+include("continuum_world.jl")
+include("continuum_world_surrogate.jl")
 include("notebook/backend.jl")
 include("notebook/html.jl")
 include("notebook/aircraft_svg.jl")
