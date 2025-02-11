@@ -694,7 +694,7 @@ function Plots.plot(sys::Project3SmallSystem, ψ::AvoidSetSpecification, ℛ::Sm
 
 	rdpad = x->rpad(round(x; sigdigits), 6, '0')
 	if typeof(ℛ) <: Vector
-		ch_student = convex_hull(UnionSetArray(ℛ))
+		ch_student = convex_hull(UnionSetArray([ℛ...]))
 	else
 		ch_student = convex_hull(ℛ)
 	end
