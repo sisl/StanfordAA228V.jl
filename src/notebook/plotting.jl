@@ -327,7 +327,7 @@ Plots.plot!(sys::Project1LargeSystem, ψ, τ=missing; kwargs...) = plot(sys, ψ,
 function Plots.plot(sys::Project1LargeSystem, ψ, τ=missing;
                     is_dark_mode=DarkModeHandler.getdarkmode(),
                     t=missing, max_lines=100, max_lines_include_failure=false,
-                    flw=2, fα=1, sα=0.25, slw=1, size=(680,350), title="", hold=false, kwargs...)
+                    flw=2, fα=1, sα=0.25, slw=1, size=(680,350), title="", hold=false, aircraft_color="black", kwargs...)
 
     dark_mode_plot(is_dark_mode;
         hold,
@@ -379,7 +379,7 @@ function Plots.plot(sys::Project1LargeSystem, ψ, τ=missing;
                 end
                 θ = rotation_from_points(p1, p2)
                 shape = scaled(rotation(Shape(aircraft_vertices), θ), shape_scale)
-                marker = (shape, 1, "black")
+                marker = (shape, 1, aircraft_color)
                 scatter!([X[end]], [H[end]]; color=primary_color, msc=primary_color, α, marker=marker, ms=4, label=false)
             end
         end
@@ -1173,7 +1173,12 @@ function plot_cw_full_reachability(sys::Project3LargeSystem, ψ, τs, ℛ;
 	return plot!(title=title, titlefontsize=12, size=(350,350), xlims=(-0.5, 10.5), ylims=(-0.5, 10.5))
 end
 
-function precompute_soundness_and_outsiders(sys::Union{Project3SmallSystem,Project3MediumSystem,Project3LargeSystem}, ℛ, τs)
+function precompute_soundness_and_outsiders(sys::Union{Project3SmallSystem,Project3MediumSystem,Project3LargeSystem}, ℛ::UnionSet, τs)
+	ℛ = concretize.(fan_sets(ℛ))
+	return precompute_soundness_and_outsiders(sys, ℛ, τs)
+end
+
+function precompute_soundness_and_outsiders(sys::Union{Project3SmallSystem,Project3MediumSystem,Project3LargeSystem}, ℛ::Union{UnionSetArray, Vector}, τs)
 	d = get_depth(sys)
 	issound = falses(d)
 	outsiders = Dict()
