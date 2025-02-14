@@ -1,15 +1,19 @@
-get_filename(::Type{<:Project1SmallSystem}, project_num::Int)  = "project$project_num-small.val"
-get_filename(::Type{<:Project1MediumSystem}, project_num::Int) = "project$project_num-medium.val"
-get_filename(::Type{<:Project1LargeSystem}, project_num::Int)  = "project$project_num-large.val"
+const ProjectSmallSystem = Union{Project1SmallSystem,Project2SmallSystem,Project3SmallSystem}
+const ProjectMediumSystem = Union{Project1MediumSystem,Project2MediumSystem,Project3MediumSystem}
+const ProjectLargeSystem = Union{Project1LargeSystem,Project2LargeSystem,Project3LargeSystems}
+
+get_filename(::Type{<:ProjectSmallSystem}, project_num::Int)  = "project$project_num-small.val"
+get_filename(::Type{<:ProjectMediumSystem}, project_num::Int) = "project$project_num-medium.val"
+get_filename(::Type{<:ProjectLargeSystem}, project_num::Int)  = "project$project_num-large.val"
 get_filename(sys_type::Type{<:System}, Project::Module)  = get_filename(sys_type, Project.project_num)
 get_filename(sys::System, Project::Module)  = get_filename(typeof(sys), Project)
 get_filename(sys::System, project_num::Int)  = get_filename(typeof(sys), project_num)
 
 env_name(sys::System) = typeof(sys).types[2].name.name
 
-system_size(sys::Project1SmallSystem) = "Small"
-system_size(sys::Project1MediumSystem) = "Medium"
-system_size(sys::Project1LargeSystem) = "Large"
+system_size(sys::ProjectSmallSystem) = "Small"
+system_size(sys::ProjectMediumSystem) = "Medium"
+system_size(sys::ProjectLargeSystem) = "Large"
 
 system_name(sys::System) = "$(system_size(sys))System"
 

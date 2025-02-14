@@ -23,6 +23,20 @@ module Project2
     @assert points_small + points_medium + points_large + points_writeup_descr + points_writeup_code == 11
 end # Project2
 
+
+module Project3
+    backend = joinpath(@__DIR__, ".project3")
+    project_num = 3
+    overleaf_link = "https://www.overleaf.com/read/frpcjyzmvvdv#421318"
+    points_small = 1
+    points_medium = 2
+    points_large = 3
+    points_writeup_descr = 3
+    points_writeup_code = 2
+    @assert points_small + points_medium + points_large + points_writeup_descr + points_writeup_code == 11
+end # Project3
+
+
 tempmodule(prefix="UsingThisViolatesTheHonorCode") = string(prefix, "_", basename(tempname()))
 process(fn, t=tempname(), k=Int((typemax(UInt16)+1)^(1/8))) = [[begin fn = let c = base64decode(read(fn, String)); open(t, "w+") do f; write(f, c); end; t; end; end for _ ∈ 1:k], t][end]
 macro include(filename); return esc(quote; t = process($filename); include(t); rm(t, force=true); nothing end) end
