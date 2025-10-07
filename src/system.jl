@@ -15,8 +15,17 @@ end
     return (; o, a, s′)
 end
 
-function rollout(sys::System; d=1)
-    s = rand(Ps(sys.env))
+"""
+    rollout(sys::System[, s₀]; d=1)
+
+Generate rollout trajectory by applying `step(sys, s; d)` at each step.
+Initial state `s₀` can be provided or is sampled from `Ps(sys.env)`.
+You may want to set `d=get_depth(sys)`.
+
+See also [`Ps`](@ref), [`step`](@ref), [`get_depth`](@ref).
+"""
+function rollout(sys::System, s₀; d=1)
+    s = s₀
     τ = []
     for t in 1:d
         o, a, s′ = step(sys, s)
@@ -25,16 +34,7 @@ function rollout(sys::System; d=1)
     end
     return τ
 end
-
-function rollout(sys::System, s; d)
-	τ = []
-	for t in 1:d
-		o, a, s′ = step(sys, s)
-		push!(τ, (; s, o, a))
-		s = s′
-	end
-	return τ
-end
+rollout(sys::System; d=1) = rollout(sys, rand(Ps(sys.env)); d)
 
 struct Disturbance
     xa # agent disturbance
@@ -123,7 +123,33 @@ Distributions.pdf(p::TrajectoryDistribution, τ) = exp(logpdf(p, τ))
     return (; o, a, s′)
 end
 
-function rollout(sys::System, s, 𝐱; d=length(𝐱))
+"""
+    rollout(sys::System[, s₀], 𝐱::AbstractVector; d=length(𝐱))
+
+Rollout `sys` using vector of noise samples `𝐱`.
+Initial state `s₀` can be provided or is sampled from `Ps(sys.env)`.
+
+# Examples
+```jldoctest
+julia> using StanfordAA228V, Distributions, LinearAlgebra
+julia> Σₒ = Diagonal([deg2rad(1.0), deg2rad(1.0)])
+julia> x = [(; xo = rand(MvNormal([0.1; 0.0], Σₒ)),  # biased mean
+               xs = [0.0; 0.0],
+               xa = 0)
+            for _ in 1:20];
+julia> struct SignAgent <: Agent end
+julia> (::SignAgent)(s, a=missing) = -sign(s[1])  # define `agent(s, a)` when `agent isa Signagent`
+julia> sys = System(SignAgent(),
+                    InvertedPendulum(),
+                    AdditiveNoiseSensor(MvNormal(Σₒ)))
+julia> s0 = rand(Ps(sys.env))
+julia> τ = rollout(sys, x);
+julia> abs(last(τ).s[1]) > pi/4
+True
+```
+"""
+function rollout(sys::System, s₀, 𝐱::AbstractVector; d=length(𝐱))
+    s = s₀
     τ = []
     for t in 1:d
         x = 𝐱[t]
@@ -133,7 +159,33 @@ function rollout(sys::System, s, 𝐱; d=length(𝐱))
     end
     return τ
 end
+# The two-arg noise rollout conflicts with `rollout(sys, s₀)` so we can't provide it.
+# rollout(sys::System, 𝐱::AbstractVector; d=length(𝐱)) = rollout(sys, rand(Ps(sys.env)), 𝐱; d)
 
+"""
+    rollout(sys::System[, s₀], p::TrajectoryDistribution; d=depth(p))
+
+Rollout `sys` using noise and an initial state drawn according to the trajectory distribution.
+One instantiation of a `TrajectoryDistribution` is the `NominalTrajectoryDistribution`
+which results in equivalent rollouts to the 1-arg `rollout(sys)` function.
+
+# Examples
+```jldoctest
+julia> import LinearAlgebra, Random
+julia> Σₒ = Diagonal([deg2rad(1.0), deg2rad(1.0)])
+julia> sys = System(ProportionalController(rand(2)),
+                    InvertedPendulum(),
+                    AdditiveNoiseSensor(MvNormal(Σₒ)))
+julia> Random.seed!(1)
+julia> τ1 = rollout(sys; d=5)
+julia> Random.seed!(1)
+julia> τ2 = rollout(sys, NominalTrajectoryDistribution(sys, 5))
+julia> [s for (; s, o, a) in τ1] .≈ [s for (; s, o, a) in τ2]
+true
+```
+
+See also [`NominalTrajectoryDistribution`](@ref).
+"""
 function rollout(sys::System, s, p::TrajectoryDistribution; d=depth(p))
     τ = []
     for t = 1:d
@@ -143,17 +195,8 @@ function rollout(sys::System, s, p::TrajectoryDistribution; d=depth(p))
     end
     return τ
 end
-
-function rollout(sys::System, p::TrajectoryDistribution; d=depth(p))
-    s = rand(initial_state_distribution(p))
-    τ = []
-    for t = 1:d
-        o, a, s′, x = step(sys, s, disturbance_distribution(p, t))
-        push!(τ, (; s, o, a, x))
-        s = s′
-    end
-    return τ
-end
+rollout(sys::System, p::TrajectoryDistribution; d=depth(p)) =
+    rollout(sys, rand(initial_state_distribution(p)), p; d)
 
 function mean_step(sys::System, s, D::DisturbanceDistribution)
     xo = mean(D.Do(s))
