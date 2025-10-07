@@ -3,7 +3,6 @@
 end
 
 function Distributions.rand(rng::AbstractRNG, d::Deterministic)
-    rand(rng)
     return d.val
 end
 Distributions.logpdf(d::Deterministic, x::T) where T<:Real = zero(x)
