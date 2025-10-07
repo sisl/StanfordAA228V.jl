@@ -16,7 +16,7 @@ end
 end
 
 """
-    rollout(sys::System, [s₀]; d=1)
+    rollout(sys::System[, s₀]; d=1)
 
 Generate rollout trajectory by applying `step(sys, s; d)` at each step.
 Initial state `s₀` can be provided or is sampled from `Ps(sys.env)`.
@@ -124,7 +124,7 @@ Distributions.pdf(p::TrajectoryDistribution, τ) = exp(logpdf(p, τ))
 end
 
 """
-    rollout(sys::System, [s₀], 𝐱::AbstractVector; d=length(𝐱))
+    rollout(sys::System[, s₀], 𝐱::AbstractVector; d=length(𝐱))
 
 Rollout `sys` using vector of noise samples `𝐱`.
 Initial state `s₀` can be provided or is sampled from `Ps(sys.env)`.
@@ -163,9 +163,28 @@ end
 # rollout(sys::System, 𝐱::AbstractVector; d=length(𝐱)) = rollout(sys, rand(Ps(sys.env)), 𝐱; d)
 
 """
-    rollout(sys::System, [s₀], p::TrajectoryDistribution; d=depth(p))
+    rollout(sys::System[, s₀], p::TrajectoryDistribution; d=depth(p))
 
-TBW
+Rollout `sys` using noise and an initial state drawn according to the trajectory distribution.
+One instantiation of a `TrajectoryDistribution` is the `NominalTrajectoryDistribution`
+which results in equivalent rollouts to the 1-arg `rollout(sys)` function.
+
+# Examples
+```jldoctest
+julia> import LinearAlgebra, Random
+julia> Σₒ = Diagonal([deg2rad(1.0), deg2rad(1.0)])
+julia> sys = System(ProportionalController(rand(2)),
+                    InvertedPendulum(),
+                    AdditiveNoiseSensor(MvNormal(Σₒ)))
+julia> Random.seed!(1)
+julia> τ1 = rollout(sys; d=5)
+julia> Random.seed!(1)
+julia> τ2 = rollout(sys, NominalTrajectoryDistribution(sys, 5))
+julia> [s for (; s, o, a) in τ1] .≈ [s for (; s, o, a) in τ2]
+true
+```
+
+See also [`NominalTrajectoryDistribution`](@ref).
 """
 function rollout(sys::System, s, p::TrajectoryDistribution; d=depth(p))
     τ = []
