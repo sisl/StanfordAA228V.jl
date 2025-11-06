@@ -32,6 +32,10 @@ jobs:
           - x64
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: 'sisl/AA228VProjects'
+          path: 'test'
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
