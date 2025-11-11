@@ -6,7 +6,8 @@ using TOML
 
 # Clone or update https://github.com/sisl/AA228VProjects
 # Note that this is cloned during CI already, so cloning is typically only needed for local testing.
-repo_url = "https://github.com/sisl/AA228VProjects.git"
+repo_url = get(ENV, "AA228V_PROJECTS_URL", "https://github.com/sisl/AA228VProjects.git")
+projects_ref = get(ENV, "AA228V_PROJECTS_REF", "origin/main")
 projectdir = get(ENV, "AA228V_PROJECTS_DIR", joinpath(dirname(@__DIR__), "..", "..", "AA228VProjects"))
 
 # Clone repo if it doesn't exist, otherwise pull latest
@@ -16,14 +17,14 @@ if !isdir(projectdir)
 else
     @info "Updating $projectdir (discarding any local changes)"
     cd(projectdir) do
-        run(`$(git()) fetch origin`)
-        run(`$(git()) switch --force --detach origin/main`)
+        run(`$(git()) fetch --all`)
+        run(`$(git()) switch --force --detach $projects_ref`)
         run(`$(git()) clean -fd`)
     end
 end
 
 # projects = ["project0", "project1", "project2", "project3"]
-projects = ["project1"]
+projects = ["project0", "project1"]
 aa228v_pkgdir = (isinteractive() ? pwd() : dirname(dirname(@__FILE__)))
 @show aa228v_pkgdir
 
