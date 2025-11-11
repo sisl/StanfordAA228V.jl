@@ -7,7 +7,7 @@ using TOML
 # Clone or update https://github.com/sisl/AA228VProjects
 # Note that this is cloned during CI already, so cloning is typically only needed for local testing.
 repo_url = "https://github.com/sisl/AA228VProjects.git"
-projectdir = joinpath(dirname(@__DIR__), "..", "..", "AA228VProjects")
+projectdir = get(ENV, "AA228V_PROJECTS_DIR", joinpath(dirname(@__DIR__), "..", "..", "AA228VProjects"))
 
 # Clone repo if it doesn't exist, otherwise pull latest
 if !isdir(projectdir)
