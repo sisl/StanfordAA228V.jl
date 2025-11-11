@@ -55,11 +55,8 @@ for project in projects
     pkgproject["sources"] = Dict(
         "StanfordAA228V" => Dict("path" => aa228v_pkgdir)
     )
-    let
-        open(Pkg.project().path; write=true) do io
-            TOML.print(io, pkgproject)
-        end
-        sleep(0.5)
+    open(Pkg.project().path; write=true) do io
+        TOML.print(io, pkgproject)
     end
     sleep(0.5)
     @info "Resolving env."
