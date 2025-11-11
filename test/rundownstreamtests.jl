@@ -45,9 +45,9 @@ for project in projects
     withenv("JULIA_PKG_PRECOMPILE_AUTO" => 0) do
         Pkg.rm("StanfordAA228V")  # this removes the compat
         sleep(1)
-        Pkg.update("Plots")  # there's a compat error otherwise
-        sleep(1)
-        Pkg.add(name="StanfordAA228V", path=aa228v_pkgdir)
+        # Pkg.update("Plots")  # there's a compat error otherwise
+        # sleep(1)
+        Pkg.develop(name="StanfordAA228V", path=aa228v_pkgdir)
     end
     sleep(3)
     @info "Adding [sources] section to $(Pkg.project().path)."
