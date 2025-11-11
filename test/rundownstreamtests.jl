@@ -1,10 +1,13 @@
 using Git
 using Pluto
+using Pkg
+using Test
+using TOML
 
 # Clone or update https://github.com/sisl/AA228VProjects
 # Note that this is cloned during CI already, so cloning is typically only needed for local testing.
 repo_url = "https://github.com/sisl/AA228VProjects.git"
-projectdir = joinpath(@__DIR__, "AA228VProjects")
+projectdir = joinpath(dirname(@__DIR__), "..", "..", "AA228VProjects")
 
 # Clone repo if it doesn't exist, otherwise pull latest
 if !isdir(projectdir)
@@ -19,71 +22,75 @@ else
     end
 end
 
-function inject_dev_package(notebook_path, package_name, package_path)
-    content = read(notebook_path, String)
-    
-    # Extract Project.toml (first special cell)
-    proj_regex = r"# ╔═╡ 00000000-0000-0000-0000-000000000001\nTOML.*?\"\"\"(.*?)\"\"\""s
-    proj_match = match(proj_regex, content)
-    
-    # Extract Manifest.toml (second special cell)
-    manifest_regex = r"# ╔═╡ 00000000-0000-0000-0000-000000000002\nTOML.*?\"\"\"(.*?)\"\"\""s
-    manifest_match = match(manifest_regex, content)
-    
-    # Modify Project.toml
-    project = TOML.parse(proj_match[1])
-    
-    # Remove compat constraint
-    if haskey(project, "compat") && haskey(project["compat"], package_name)
-        delete!(project["compat"], package_name)
-    end
-    
-    # Add/update sources section
-    if !haskey(project, "sources")
-        project["sources"] = Dict{String, Any}()
-    end
-    project["sources"][package_name] = Dict("path" => package_path)
-    
-    # Modify Manifest.toml
-    manifest = TOML.parse(manifest_match[1])
-    
-    # Find and modify the package entry in manifest
-    if haskey(manifest, "deps") && haskey(manifest["deps"], package_name)
-        entries = manifest["deps"][package_name]
-        # Handle both single entry and array of entries
-        if entries isa AbstractVector
-            for entry in entries
-                delete!(entry, "version")
-                delete!(entry, "git-tree-sha1")
-                entry["path"] = package_path
-            end
-        else
-            delete!(entries, "version")
-            delete!(entries, "git-tree-sha1")
-            entries["path"] = package_path
-        end
-    end
-    
-    # Convert back to TOML strings
-    new_proj = sprint(TOML.print, project)
-    new_manifest = sprint(TOML.print, manifest)
-    
-    # Replace in content
-    content = replace(content, proj_match[1] => new_proj, count=1)
-    content = replace(content, manifest_match[1] => new_manifest, count=1)
-    
-    # Write back
-    write(notebook_path, content)
-    @info "Injected dev package $package_name at $package_path into $notebook_path"
-end
-
-projects = ["project0", "project1", "project2", "project3"]
-package_path = abspath(@__DIR__)  # Full path to StanfordAA228V package
+# projects = ["project0", "project1", "project2", "project3"]
+projects = ["project1"]
+aa228v_pkgdir = (isinteractive() ? pwd() : dirname(dirname(@__FILE__)))
+@show aa228v_pkgdir
 
 for project in projects
     notebookfile = joinpath(projectdir, project, project * ".jl")
+
+    @info "Testing $project"
+    # Here we must make sure to "dev" the current version of the package.
+    # The issue is that if there is any package resolution failure, Pluto
+    # deletes the whole Manifest (via GracefulPkg.jl). So adding a custom
+    # path to the manifest is fragile. Instead we must add a `[sources]`
+    # section to the Project.toml file, which will "survive" a Manifest
+    # reset. We must also remove any `compat` entry for our package.
+
+    # Activate the notebook's environment and develop the local package.
+    # We sleep briefly after changes to make sure all files can sync.
+    Pluto.activate_notebook_environment(notebookfile)
+    @info "Removing upstream StanfordAA228V and updating Plots (for compat)."
+    withenv("JULIA_PKG_PRECOMPILE_AUTO" => 0) do
+        Pkg.rm("StanfordAA228V")  # this removes the compat
+        sleep(1)
+        Pkg.update("Plots")  # there's a compat error otherwise
+        sleep(1)
+        Pkg.add(name="StanfordAA228V", path=aa228v_pkgdir)
+    end
+    sleep(3)
+    @info "Adding [sources] section to $(Pkg.project().path)."
+    pkgproject = read(Pkg.project().path, String) |> TOML.parse
+    pkgproject["sources"] = Dict(
+        "StanfordAA228V" => Dict("path" => aa228v_pkgdir)
+    )
+    let
+        open(Pkg.project().path; write=true) do io
+            TOML.print(io, pkgproject)
+        end
+        sleep(0.5)
+    end
+    sleep(0.5)
+    @info "Resolving env."
+    Pkg.resolve()
+    @info "Instantiating env."
+    Pkg.instantiate()
+
+    # check that Manifest is updated correctly
+    pkgmanifest = let path = joinpath(dirname(Pkg.project().path), "Manifest.toml")
+        TOML.parse(read(path, String))
+    end
+    @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
+    # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
+
+    # Open and run the notebook.
     session = Pluto.ServerSession()
     notebook = Pluto.SessionActions.open(session, notebookfile; run_async=false)
-    # Check all cells succeeded
-    @assert all(c -> c.errored == false, values(notebook.cells))
+
+    # Check that all cells succeeded.
+    @test all(c -> c.errored == false, values(notebook.cells))
+    @info "$project completed successfully"
+
+    # Check that custom path is still used after GracefulPkg has done its job.
+    pkgmanifest = let path = joinpath(dirname(Pkg.project().path), "Manifest.toml")
+        TOML.parse(read(path, String))
+    end
+    @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
+    # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
 end
+
+# Step 2:
+# copy in the answers, e.g. via key that I store in the envvar of the repo and use to decode the answers
+# we probably encode the files with `age`
+# We can think about using `Argus` to pattern match the cells that we want to delete
