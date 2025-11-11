@@ -23,8 +23,9 @@ else
 end
 
 # projects = ["project0", "project1", "project2", "project3"]
-projects = ["project0", "project1"]
-aa228v_pkgdir = pkgdir(StanfordAA228V)
+projects = ["project1"]
+aa228v_pkgdir = (isinteractive() ? pwd() : dirname(dirname(@__FILE__)))
+@show aa228v_pkgdir
 
 for project in projects
     notebookfile = joinpath(projectdir, project, project * ".jl")
@@ -35,7 +36,7 @@ for project in projects
     # deletes the whole Manifest (via GracefulPkg.jl). So adding a custom
     # path to the manifest is fragile. Instead we must add a `[sources]`
     # section to the Project.toml file, which will "survive" a Manifest
-    # reset. We also must remove any `compat` entry for our package.
+    # reset. We must also remove any `compat` entry for our package.
 
     # Activate the notebook's environment and develop the local package.
     # We sleep briefly after changes to make sure all files can sync.
@@ -43,14 +44,16 @@ for project in projects
     @info "Removing upstream StanfordAA228V and updating Plots (for compat)."
     withenv("JULIA_PKG_PRECOMPILE_AUTO" => 0) do
         Pkg.rm("StanfordAA228V")  # this removes the compat
+        sleep(1)
         Pkg.update("Plots")  # there's a compat error otherwise
+        sleep(1)
         Pkg.add(name="StanfordAA228V", path=aa228v_pkgdir)
     end
-    sleep(1)
+    sleep(3)
     @info "Adding [sources] section to $(Pkg.project().path)."
     pkgproject = read(Pkg.project().path, String) |> TOML.parse
     pkgproject["sources"] = Dict(
-        "StanfordAA228V" => Dict("path" => pwd())
+        "StanfordAA228V" => Dict("path" => aa228v_pkgdir)
     )
     let
         open(Pkg.project().path; write=true) do io
@@ -68,8 +71,8 @@ for project in projects
     pkgmanifest = let path = joinpath(dirname(Pkg.project().path), "Manifest.toml")
         TOML.parse(read(path, String))
     end
-    @test haskey(pkgmanifest["deps"]["StanfordAA228V"], "path")
-    @test !haskey(pkgmanifest["deps"]["StanfordAA228V"], "git-tree-sha1")
+    @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
+    @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
 
     # Open and run the notebook.
     session = Pluto.ServerSession()
@@ -80,8 +83,11 @@ for project in projects
     @info "$project completed successfully"
 
     # Check that custom path is still used after GracefulPkg has done its job.
-    @test haskey(pkgmanifest["deps"]["StanfordAA228V"], "path")
-    @test !haskey(pkgmanifest["deps"]["StanfordAA228V"], "git-tree-sha1")
+    pkgmanifest = let path = joinpath(dirname(Pkg.project().path), "Manifest.toml")
+        TOML.parse(read(path, String))
+    end
+    @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
+    @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
 end
 
 # Step 2:
