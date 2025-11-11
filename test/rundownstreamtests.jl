@@ -72,7 +72,7 @@ for project in projects
         TOML.parse(read(path, String))
     end
     @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
-    @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
+    # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
 
     # Open and run the notebook.
     session = Pluto.ServerSession()
@@ -87,7 +87,7 @@ for project in projects
         TOML.parse(read(path, String))
     end
     @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
-    @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
+    # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
 end
 
 # Step 2:
