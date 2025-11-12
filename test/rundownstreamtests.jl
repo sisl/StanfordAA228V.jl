@@ -52,16 +52,12 @@ for project in projects
     withenv("JULIA_PKG_PRECOMPILE_AUTO" => 0) do
         Pkg.rm("StanfordAA228V")  # this removes the compat
         sleep(1)
-        # Pkg.update("Plots")  # there's a compat error otherwise
-        # sleep(1)
         Pkg.develop(name="StanfordAA228V", path=aa228v_pkgdir)
     end
     sleep(3)
     @info "Adding [sources] section to $(Pkg.project().path)."
     pkgproject = read(Pkg.project().path, String) |> TOML.parse
-    pkgproject["sources"] = Dict(
-        "StanfordAA228V" => Dict("path" => aa228v_pkgdir)
-    )
+    pkgproject["sources"] = Dict("StanfordAA228V" => Dict("path" => aa228v_pkgdir))
     open(Pkg.project().path; write=true) do io
         TOML.print(io, pkgproject)
     end
