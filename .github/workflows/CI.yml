@@ -32,10 +32,6 @@ jobs:
           - x64
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: 'sisl/AA228VProjects'
-          path: 'test/AA228VProjects'
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}
@@ -45,3 +41,5 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
         env:
           GROUP: ${{ matrix.group }}
+          AA228V_PROJECTS_URL: "https://github.com/RomeoV/AA228VProjects.git"
+          AA228V_PROJECTS_REF: "bump-deps"
