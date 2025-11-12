@@ -30,7 +30,7 @@ else
 end
 
 # projects = ["project0", "project1", "project2", "project3"]
-projects = ["project0", "project1"]
+projects = ["project0", "project1", "project2"]
 aa228v_pkgdir = (isinteractive() ? pwd() : dirname(dirname(@__FILE__)))
 @show aa228v_pkgdir
 
