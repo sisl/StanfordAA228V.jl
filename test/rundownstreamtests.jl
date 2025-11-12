@@ -76,6 +76,7 @@ for project in projects
 
     # Open and run the notebook.
     session = Pluto.ServerSession()
+    @info "Running notebook for $project."
     notebook = Pluto.SessionActions.open(session, notebookfile; run_async=false)
 
     # Check that all cells succeeded.
@@ -88,6 +89,7 @@ for project in projects
     end
     @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
     # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
+    @info "Done. Shutting down session for $project."
 end
 
 # Step 2:
