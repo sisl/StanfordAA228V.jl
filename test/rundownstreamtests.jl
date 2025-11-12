@@ -12,10 +12,16 @@ projectdir = get(ENV, "AA228V_PROJECTS_DIR", joinpath(dirname(@__DIR__), "..", "
 
 # Clone repo if it doesn't exist, otherwise pull latest
 if !isdir(projectdir)
-    @info "Cloning $repo_url to $projectdir (branch: $projects_ref)"
+    @info """
+    Did not find project directory: $(projectdir).
+    Cloning $repo_url to $projectdir (branch: $projects_ref)
+    """
     run(`$(git()) clone --branch $projects_ref $repo_url $projectdir`)
 else
-    @info "Updating $projectdir (discarding any local changes)"
+    @info """
+    Found project directory: $(projectdir). Ignoring `repo_url`.
+    Updating $projectdir (discarding any local changes)
+    """
     cd(projectdir) do
         run(`$(git()) fetch --all`)
         run(`$(git()) switch --force --detach $projects_ref`)
