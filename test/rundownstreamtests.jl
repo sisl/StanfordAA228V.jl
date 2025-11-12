@@ -90,6 +90,7 @@ for project in projects
     @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
     # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
     @info "Done. Shutting down session for $project."
+    Pluto.SessionActions.shutdown(session, notebook; async=false)
 end
 
 # Step 2:
