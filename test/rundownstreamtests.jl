@@ -7,13 +7,13 @@ using TOML
 # Clone or update https://github.com/sisl/AA228VProjects
 # Note that this is cloned during CI already, so cloning is typically only needed for local testing.
 repo_url = get(ENV, "AA228V_PROJECTS_URL", "https://github.com/sisl/AA228VProjects.git")
-projects_ref = get(ENV, "AA228V_PROJECTS_REF", "origin/main")
+projects_ref = get(ENV, "AA228V_PROJECTS_REF", "main")
 projectdir = get(ENV, "AA228V_PROJECTS_DIR", joinpath(dirname(@__DIR__), "..", "..", "AA228VProjects"))
 
 # Clone repo if it doesn't exist, otherwise pull latest
 if !isdir(projectdir)
-    @info "Cloning $repo_url to $projectdir"
-    run(`$(git()) clone $repo_url $projectdir`)
+    @info "Cloning $repo_url to $projectdir (branch: $projects_ref)"
+    run(`$(git()) clone --branch $projects_ref $repo_url $projectdir`)
 else
     @info "Updating $projectdir (discarding any local changes)"
     cd(projectdir) do
