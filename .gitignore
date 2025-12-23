@@ -3,3 +3,4 @@ Manifest.toml
 .DS_Store
 .envrc
 .dir-locals.el
+docs/build

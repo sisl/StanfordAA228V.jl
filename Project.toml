@@ -53,4 +53,4 @@ TOML = "1.0.3"
 julia = "1"
 
 [workspace]
-projects = ["test"]
+projects = ["test", "docs"]
