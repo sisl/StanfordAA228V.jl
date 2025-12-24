@@ -74,8 +74,8 @@ end
     rollout(sys::System, 𝐱::VX; d=length(𝐱)) where VX <: Vector{<:NamedTuple}
     rollout(sys::System, s₀, 𝐱; d=length(𝐱))
 
-Generate rollout trajectory of system `sys` by applying [`step(sys, s)`](@ref)
-or [`step(sys, s, x)`](@ref) at each step.
+Generate rollout trajectory of system `sys` by applying [`step(sys, s)`](@ref Base.step)
+or [`step(sys, s, x)`](@ref Base.step) at each step.
 Returns a vector of steps where each step is a `NamedTuple` `(o, a, s, x)`
 or `(o, a, s)`.
 
@@ -127,7 +127,7 @@ julia> rollout(sys, τₓ);
 julia> rollout(sys, s₀, τₓ);  # and we can pass everything at once
 ```
 See [`TrajectoryDistribution`](@ref) for an example to set up your own `FuzzingDistribution` example.
-See also [`NominalTrajectoryDistribution`](@ref), [`step`](@ref).
+See also [`NominalTrajectoryDistribution`](@ref), [`step`](@ref Base.step).
 
 # A Note on Function Disambiguition
 There is an interesting detail here how Julia diambiguates how to execute
