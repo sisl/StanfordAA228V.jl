@@ -5,7 +5,7 @@
     dt = 0.05
 end
 
-function (env::MassSpringDamper)(s, a)
+function (env::MassSpringDamper)(s, a, xs=missing)
     return Ts(env) * s + Ta(env) * a
 end
 
