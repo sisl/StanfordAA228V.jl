@@ -18,9 +18,7 @@ true
 
 See also [`initial_state_distribution`](@ref), [`NominalTrajectoryDistribution`](@ref).
 """
-function Ps(env::Environment)
-    throw("NotImplementedError: `Ps(::$(typeof(env)))` not implemented. Perhaps you forgot to overload `Ps(env::{{ your type }})` for your type?")
-end
+function Ps end
 
 
 struct System{A<:Agent, E<:Environment, S<:Sensor}
@@ -150,6 +148,18 @@ function rollout(sys::System, s₀::AbstractVector{<:Real}; d=1)
 end
 rollout(sys::System; d=1) = rollout(sys, rand(Ps(sys.env)); d)
 
+"""
+    Disturbance
+
+Holds disturbance sample. Interchangable with a NamedTuple with the same names.
+
+# Fields
+- `xa` agent disturbance
+- `xs` environment disturbance
+- `xo` sensor disturbance
+
+See also [`DisturbanceDistribution`](@ref).
+"""
 struct Disturbance
     xa # agent disturbance
     xs # environment disturbance
@@ -254,31 +264,37 @@ See also [`Ps`](@ref), [`Do`](@ref), [`Da`](@ref), [`Ds`](@ref), [`MvNormal`](@e
 abstract type TrajectoryDistribution end
 
 """
-    initial_state_distribution(p::TrajectoryDistribution)
+    initial_state_distribution(pτ::TrajectoryDistribution)
 
-TBW
+Used to specify the initial distribution `s₀`.
+If [`pτ isa NominalTrajectoryDistribution`](@ref NominalTrajectoryDistribution) this is just [`Ps(sys.env)`](@ref Ps).
+
+See also [`TrajectoryDistribution`](@ref) for an example how to specify this for a custom fuzzing distribution.
 """
-function initial_state_distribution(p::TrajectoryDistribution)
-    throw("NotImplementedError: `initial_state_distribution(::$(typeof(p)))` not implemented. Perhaps you forgot to overload `initial_state_distribution(p::{{ your type }})` for your type?")
-end
+function initial_state_distribution end
 
 """
-    disturbance_distribution(p::TrajectoryDistribution, t)
+    disturbance_distribution(pτ::TrajectoryDistribution, t)
 
-TBW
+Used to specify the disturbance distribution.
+If [`pτ isa NominalTrajectoryDistribution`](@ref NominalTrajectoryDistribution) this is just
+```julia
+DisturbanceDistribution((o) -> Da(sys.agent, o),
+                        (s, a) -> Ds(sys.env, s, a),
+                        (s) -> Do(sys.sensor, s))
+```
+
+See [`TrajectoryDistribution`](@ref) for an example how to specify this for a custom fuzzing distribution.
+See also [`Da`](@ref), [`Ds`](@ref), [`Do`](@ref).
 """
-function disturbance_distribution(p::TrajectoryDistribution, t)
-    throw("NotImplementedError: `disturbance_distribution(::$(typeof(p)), ::$(typeof(t)))` not implemented. Perhaps you forgot to overload `disturbance_distribution(p::{{ your type }}, t)` for your type?")
-end
+function disturbance_distribution end
 
 """
     depth(p::TrajectoryDistribution)
 
 TBW
 """
-function depth(p::TrajectoryDistribution)
-    throw("NotImplementedError: `depth(::$(typeof(p)))` not implemented. Perhaps you forgot to overload `depth(p::{{ your type }})` for your type?")
-end
+function depth end
 
 (p::TrajectoryDistribution)(τ) = pdf(p, τ)
 

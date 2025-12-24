@@ -1,3 +1,12 @@
+"""
+    ContinuumWorld <: Environment
+
+A simple environment with circular obstacles and a simple action space of movement directions.
+```@example
+using StanfordAA228V
+get_depth(ContinuumWorld())
+```
+"""
 @with_kw struct ContinuumWorld <: Environment
     size = [10, 10]                          # dimensions
     terminal_centers = [[4.5,4.5],[6.5,7.5]] # obstacle and goal centers
@@ -25,4 +34,10 @@ end
 const Project3LargeSystemOriginal::Type = System{InterpAgent, ContinuumWorld, IdealSensor}
 
 get_depth(sys::Project3LargeSystemOriginal) = get_depth(sys.env)
+
+"""
+    get_depth(env::ContinuumWorld)
+
+The [`ContinuumWorld`](@ref) runs for 20 steps.
+"""
 get_depth(env::ContinuumWorld) = 20

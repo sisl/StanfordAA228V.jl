@@ -40,10 +40,30 @@ julia> isfailure(ψ₃, τ)
 true
 ```
 
-See also [`evaluate`](@ref), [`@formula`](@ref formulastub).
+See also [`evaluate`](@ref), [`@formula`](@ref formulastub), [`LTLSpecification`](@ref).
 """
 isfailure(ψ::Specification, τ) = !evaluate(ψ, τ)
 
+"""
+    LTLSpecification <: Specification
+
+A specification of a formula using *linear temporal logic* ([kochenderfer2026validation; Chapter 3.5.1](@citet)).
+Formulas are specified using [`@formula`](@ref formulastub) from [`SignalTemporalLogic.jl`](https://github.com/sisl/SignalTemporalLogic.jl).
+
+# Example
+```jldoctest
+julia> using SignalTemporalLogic, StanfordAA228V
+
+julia> τ = [(s=2.0, ), (s=1.0, ), (s=-1.0, )];  # typically from system rollout
+
+julia> ψ = LTLSpecification(@formula ◊(sₜ -> sₜ < 0.0));  # eventually
+
+julia> evaluate(ψ, τ)
+true
+```
+
+See also [`evaluate`](@ref), [`isfailure`](@ref), [`@formula`](@ref formulastub), [`rollout`](@ref).
+"""
 struct LTLSpecification <: Specification
 	formula # formula specified using SignalTemporalLogic.jl
 end
@@ -60,7 +80,8 @@ Broadcast.broadcastable(ψ::Specification) = Ref(ψ)
 """
     @formula expr
 
-Construct a Signal Temporal Logic formula using SignalTemporalLogic.jl.
+Construct a Signal Temporal Logic formula using [`SignalTemporalLogic.jl`](https://github.com/sisl/SignalTemporalLogic.jl).
+See [kochenderfer2026validation; Chapter 3.4-3.5](@citet).
 
 # Temporal operators
 - `□(φ)`: Always (globally) - φ must hold at all time steps
@@ -68,11 +89,12 @@ Construct a Signal Temporal Logic formula using SignalTemporalLogic.jl.
 - `𝒰(φ, ψ)`: Until - φ holds until ψ becomes true
 
 # Examples
-```jldoctest
+```julia
 julia> using SignalTemporalLogic
 julia> @formula sₜ -> sₜ > 0.0  # Atomic proposition
-julia> @formula □(sₜ -> sₜ > 0.0)  # Always positive
-julia> @formula ◊(sₜ -> sₜ > 0.0)  # Eventually positive
+julia> @formula □(sₜ -> sₜ > 0.0)  # Always positive. Type as `\\square<TAB>`
+julia> @formula ◊(sₜ -> sₜ > 0.0)  # Eventually positive. Type as `\\lozenge<TAB>`
+```
 
 For more info see the [`SignalTemporalLogic` documentation](https://sisl.github.io/SignalTemporalLogic.jl/notebooks/runtests.html).
 """

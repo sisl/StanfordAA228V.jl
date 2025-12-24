@@ -1,3 +1,6 @@
+"""
+    ContinuumWorldSurrogate <: Environment
+"""
 @with_kw struct ContinuumWorldSurrogate <: Environment
     cw::ContinuumWorld = ContinuumWorld()
     model # ::Chain
