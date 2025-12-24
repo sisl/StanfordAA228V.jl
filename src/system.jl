@@ -140,7 +140,7 @@ the initial state or a noise trajectory.
 The solution is that Julia's dispatch mechanism checks the type of the second argument.
 If `s₀ isa Vector{<:Real}`, i.e., a vector of e.g. `Float64`, then a different
 function is called than when `τₓ isa Vector{<:NamedTuple}`.
-If you want to learn more about this, check [Wikipedia: Multiple Dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch)
+If you would like to learn more about this, check [Wikipedia: Multiple Dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch)
 and [Julia: Methods](https://docs.julialang.org/en/v1/manual/methods/).
 """
 function rollout end
@@ -310,7 +310,12 @@ function depth end
 (p::TrajectoryDistribution)(τ) = pdf(p, τ)
 
 """
-    NominalTrajectoryDistribution
+    NominalTrajectoryDistribution <: TrajectoryDistribution
+
+An implementation of a [`TrajectoryDistribution`](@ref) using the system's nominal initial state
+via [`Ps(sys.env)`](@ref) and the nominal [`DisturbanceDistribution`](@ref) via [`Da`](@ref), [`Ds`](@ref), and [`Do`](@ref).
+
+See [`TrajectoryDistribution`](@ref) for an example how to define an alternative fuzzing distribution.
 """
 struct NominalTrajectoryDistribution <: TrajectoryDistribution
     Ps # initial state distribution
