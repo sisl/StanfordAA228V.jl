@@ -1,5 +1,7 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterCitations = "daee34ce-89f3-4625-b898-19384cb65244"
+DocumenterInterLinks = "d12716ef-a0f6-4df4-a9f1-a5a34e75c656"
 SignalTemporalLogic = "a79a9ddd-d50e-4d85-a979-5d85760e62a0"
 StanfordAA228V = "6f6e590e-f8c2-4a21-9268-94576b9fb3b1"
 
