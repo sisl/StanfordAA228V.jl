@@ -52,6 +52,8 @@ julia> seed!(0); rand(Ds(env, zeros(2), 0))
  -0.086290835122697
 ```
 
+More details for each system are provided in the project files themselves.
+
 See also [`DisturbanceDistribution`](@ref).
 """
 Ds(env::Environment, s, a) = Deterministic()

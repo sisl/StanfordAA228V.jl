@@ -138,7 +138,7 @@ actual implementation is different depending on whether the second argument is
 the initial state or a noise trajectory.
 
 The solution is that Julia's dispatch mechanism checks the type of the second argument.
-If `s₀ isa Vector{<:Real}`, i.e., a vector of e.g. `Float64`, then a different
+If `s₀ isa Vector{<:Real}`, e.g., a vector of `Float64`, then a different
 function is called than when `τₓ isa Vector{<:NamedTuple}`.
 If you would like to learn more about this, check [Wikipedia: Multiple Dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch)
 and [Julia: Methods](https://docs.julialang.org/en/v1/manual/methods/).
