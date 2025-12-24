@@ -292,10 +292,10 @@ function rollout(sys::System, s, p::TrajectoryDistribution; d=depth(p))
         push!(τ, (; s, o, a, x))
         s = s′
     end
-    return τ
+    return identity.(τ)  # `identity` converts `Vector{Any}` to concrete vector
 end
 rollout(sys::System, p::TrajectoryDistribution; d=depth(p)) =
-    rollout(sys, rand(initial_state_distribution(p)), p; d)
+    rollout(sys, rand(initial_state_distribution(p)), p; d=d)
 
 function mean_step(sys::System, s, D::DisturbanceDistribution)
     xo = mean(D.Do(s))
