@@ -139,6 +139,27 @@ struct Disturbance
     xo # sensor disturbance
 end
 
+"""
+    DisturbanceDistribution
+
+`struct` holding the disturance distribution for the agent, state, and observations.
+
+# Fields
+- `Da`: Agent disturbance distribution with signature `(o)->Distribution`
+- `Ds`: Environment disturbance distribution with signature `(s, a)->Distribution`
+- `Do`: Sensor disturbance distribution with signature `(s)->Distribution`
+
+# Default Constructor
+```julia
+function DisturbanceDistribution(sys::System)
+    return DisturbanceDistribution((o) -> Da(sys.agent, o),
+                                   (s, a) -> Ds(sys.env, s, a),
+                                   (s) -> Do(sys.sensor, s))
+end
+```
+
+See [`TrajectoryDistribution`](@ref) for an example how to use this for a custom fuzzing distribution.
+"""
 struct DisturbanceDistribution
     Da # agent disturbance distribution
     Ds # environment disturbance distribution
