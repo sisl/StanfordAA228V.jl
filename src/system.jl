@@ -150,13 +150,82 @@ Distributions.fit(𝐝::Vector, samples, w) = [fit(d, [s[t] for s in samples], w
 Distributions.fit(d::Sampleable, samples, w::Missing) = fit(typeof(d), samples)
 Distributions.fit(d::Sampleable, samples, w) = fit_mle(typeof(d), samples, w)
 
+"""
+    TrajectoryDistribution
+
+A trajectory distribution characterizes the [`initial_state_distribution`](@ref),
+[`disturbance_distribution`](@ref), and [`depth`](@ref) of a system rollout.
+It is an `abstract type` but can be used to subtype a new distribution.
+
+# Example
+```jldoctest
+julia> using StanfordAA228V, Distributions, LinearAlgebra
+
+julia> struct MyFuzzingDistribution{S<:System} <: TrajectoryDistribution
+         sys::S
+         param::Float64
+       end;
+
+julia> # IMPORTANT: we have to explicitly import external functions to ovlerload them
+
+julia> import StanfordAA228V: initial_state_distribution, disturbance_distribution, depth
+
+julia> initial_state_distribution(pτ::MyFuzzingDistribution) = Ps(pτ.sys.env);  # system default
+
+julia> disturbance_distribution(pτ::MyFuzzingDistribution, t) = DisturbanceDistribution(
+           (o) -> Deterministic(0),  # action noise -> always 0
+           (s, a) -> Ds(pτ.sys.env, s, a),  # dynamics noise -> regular system dynamics
+           (s) -> MvNormal(
+                    mean(Do(sys.sensor, s)),
+                    pτ.param*cov(Do(sys.sensor, s))
+                  )  # observation noise -> nominal with increase covariance
+       );
+
+julia> depth(pτ::MyFuzzingDistribution) = 10;
+
+julia> sys = System(ProportionalController([0, 0]),
+                    InvertedPendulum(),
+                    AdditiveNoiseSensor(MvNormal(0.1 * I(2))));
+
+julia> τ = rollout(sys, MyFuzzingDistribution(sys, 2.0));
+```
+
+See also [`Ps`](@ref), [`Do`](@ref), [`Da`](@ref), [`Ds`](@ref), [`MvNormal`](@extref Distributions.MvNormal).
+"""
 abstract type TrajectoryDistribution end
-function initial_state_distribution(p::TrajectoryDistribution) end
-function disturbance_distribution(p::TrajectoryDistribution, t) end
-function depth(p::TrajectoryDistribution) end
+
+"""
+    initial_state_distribution(p::TrajectoryDistribution)
+
+TBW
+"""
+function initial_state_distribution(p::TrajectoryDistribution)
+    throw("NotImplementedError: `initial_state_distribution(::$(typeof(p)))` not implemented. Perhaps you forgot to overload `initial_state_distribution(p::{{ your type }})` for your type?")
+end
+
+"""
+    disturbance_distribution(p::TrajectoryDistribution, t)
+
+TBW
+"""
+function disturbance_distribution(p::TrajectoryDistribution, t)
+    throw("NotImplementedError: `disturbance_distribution(::$(typeof(p)), ::$(typeof(t)))` not implemented. Perhaps you forgot to overload `disturbance_distribution(p::{{ your type }}, t)` for your type?")
+end
+
+"""
+    depth(p::TrajectoryDistribution)
+
+TBW
+"""
+function depth(p::TrajectoryDistribution)
+    throw("NotImplementedError: `depth(::$(typeof(p)))` not implemented. Perhaps you forgot to overload `depth(p::{{ your type }})` for your type?")
+end
 
 (p::TrajectoryDistribution)(τ) = pdf(p, τ)
 
+"""
+    NominalTrajectoryDistribution
+"""
 struct NominalTrajectoryDistribution <: TrajectoryDistribution
     Ps # initial state distribution
     D  # disturbance distribution
