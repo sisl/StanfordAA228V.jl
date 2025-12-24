@@ -34,7 +34,7 @@ Distributions.mean(d::Deterministic) = d.val
 
 Return the nominal noise distribution for the dynamics.
 For example
-```
+```jldoctest
 julia> using StanfordAA228V, Distributions
 
 julia> Ds(SimpleGaussian(), [0], [0])  # SimpleGaussian has no dynamics noise

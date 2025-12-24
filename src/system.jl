@@ -6,6 +6,11 @@ abstract type Sensor end
     Ps(env::Environment)
 
 `Ps` denotes the nominal probability distribution over the initial state of the environment.
+It is overloaded for each concrete environment, e.g., 
+```julia
+Ps(env::SimpleGaussian) = Normal()
+```
+
 In other words
 ```jldoctest
 julia> using StanfordAA228V
@@ -21,6 +26,16 @@ See also [`initial_state_distribution`](@ref), [`NominalTrajectoryDistribution`]
 function Ps end
 
 
+"""
+    System{A<:Agent, E<:Environment, S<:Sensor}
+
+`struct` defining a system. 
+
+# Fields
+- `agent`
+- `env`
+- `sensor`
+"""
 struct System{A<:Agent, E<:Environment, S<:Sensor}
     agent::A
     env::E
@@ -62,7 +77,7 @@ end
 Generate rollout trajectory of system `sys` by applying [`step(sys, s)`](@ref)
 or [`step(sys, s, x)`](@ref) at each step.
 Returns a vector of steps where each step is a `NamedTuple` `(o, a, s, x)`
-or `(o, a, s, x)`.
+or `(o, a, s)`.
 
 Both the initial state and noise trajectory can be optionally provided.
 
@@ -140,8 +155,8 @@ function rollout(sys::System, s₀::AbstractVector{<:Real}; d=1)
     τ = []
     D = DisturbanceDistribution(sys)
     for _ in 1:d
-        o, a, s′ = step(sys, s, D)
-        push!(τ, (; s, o, a))
+        o, a, s′, x = step(sys, s, D)
+        push!(τ, (; s, o, a, x))
         s = s′
     end
     return identity.(τ)  # `identity` converts `Vector{Any}` to concrete vector
@@ -292,7 +307,8 @@ function disturbance_distribution end
 """
     depth(p::TrajectoryDistribution)
 
-TBW
+Specifies number of steps for a trajectory distribution.
+See [`TrajectoryDistribution`](@ref) for an example how to specify this for a custom fuzzing distribution.
 """
 function depth end
 

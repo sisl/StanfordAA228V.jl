@@ -2,7 +2,7 @@ abstract type Specification end
 function evaluate(ψ::Specification, τ) end
 
 """
-    isfailure(ψ::LTLSpecification, τ)::Bool
+    isfailure(ψ::LTLSpecification, τ)
 
 Return `true` if the states in trajectory `τ` fail to satisfy specification `ψ`, `false` otherwise.
 Logical inverse of [`evaluate`](@ref).
@@ -71,7 +71,10 @@ end
 """
     evaluate(ψ::LTLSpecification, τ)
 
-TBW
+Return `true` if the states in trajectory `τ` satisfy the specification `ψ`, `false` otherwise.
+Logical inverse of [`isfailure`](@ref).
+
+See also [`isfailure`](@ref) for an example.
 """
 evaluate(ψ::LTLSpecification, τ) = ψ.formula([step.s for step in τ])
 
