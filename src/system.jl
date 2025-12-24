@@ -81,9 +81,6 @@ or `(o, a, s)`.
 
 Both the initial state and noise trajectory can be optionally provided.
 
-# Initial State
-The initial state can be provided via `s₀` and is otherwise sampled from [`Ps(sys.env)`](@ref Ps).
-
 ## Examples
 ```jldoctest rollout
 julia> using StanfordAA228V
@@ -97,7 +94,12 @@ julia> d = 5;
 julia> rollout(sys);
 
 julia> rollout(sys; d=d);
+```
 
+# Initial State
+The initial state can be provided via `s₀` and is otherwise sampled from [`Ps(sys.env)`](@ref Ps).
+
+```jldoctest rollout
 julia> s₀ = rand(2);
 
 julia> rollout(sys, s₀; d=d);
@@ -113,23 +115,16 @@ action noise `xa` is rolled out as follows:
 
 ## Examples
 ```jldoctest rollout
-julia> # load sys as above
+julia> pτ = NominalTrajectoryDistribution(sys, 5)  # or another `FuzzingDistribution`
 
-julia> import Random: seed!
-
-julia> seed!(1); τ1 = rollout(sys; d=5);
-
-julia> seed!(1); τ2 = rollout(sys, NominalTrajectoryDistribution(sys, 5));  # or another `FuzzingDistribution`
-
-julia> [s for (; s, o, a) in τ1] ≈ [s for (; s, o, a) in τ2]
-true
+julia> τ1 = rollout(sys, pτ);  # this is effectively the same as `rollout(sys)`
 
 julia> τₓ = [(xo = -0.1 .+ randn(2), xa=nothing, xs=nothing)
-             for _ in 1:5];
+             for _ in 1:5];  # we can specify noise trajectory manually
 
 julia> rollout(sys, τₓ);
 
-julia> rollout(sys, s₀, τₓ);
+julia> rollout(sys, s₀, τₓ);  # and we can pass everything at once
 ```
 See [`TrajectoryDistribution`](@ref) for an example to set up your own `FuzzingDistribution` example.
 See also [`NominalTrajectoryDistribution`](@ref), [`step`](@ref).
