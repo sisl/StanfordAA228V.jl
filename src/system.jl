@@ -29,6 +29,23 @@ struct System{A<:Agent, E<:Environment, S<:Sensor}
     sensor::S
 end
 
+"""
+    step(sys::System, s)
+    step(sys::System, s, D::DisturbanceDistribution)
+    step(sys::System, s, x::Disturbance)
+    step(sys::System, s, x::NamedTuple)
+
+Progress the system by one time step by
+- using `sys.sensor` to make an observation; 
+- using `sys.agent` to decide on an action; and
+- using `sys.env` to run system dynamics.
+
+If no disturbance is provided, use [`Do`](@ref), [`Da`](@ref), and [`Ds`](@ref)
+to sample disturbances.
+If disturbance is provided directly via a [`Disturbance`](@ref) or `NamedTuple`,
+use those disturbances. If disturbance is provided via a [`DisturbanceDistribution`](@ref)
+then sample from that.
+"""
 @counted function Base.step(sys::System, s)
     o = sys.sensor(s)
     a = sys.agent(o)
