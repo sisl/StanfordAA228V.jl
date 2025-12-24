@@ -81,94 +81,21 @@ julia> rollout(sys, τₓ);
 julia> rollout(sys, s₀, τₓ);
 ```
 See [`TrajectoryDistribution`](@ref) for an example to set up your own `FuzzingDistribution` example.
+See also [`NominalTrajectoryDistribution`](@ref), [`step`](@ref).
 
-# Examples
-```jldoctest
-julia> using StanfordAA228V
+# A Note on Function Disambiguition
+There is an interesting detail here how Julia diambiguates how to execute
+- `rollout(sys, s₀)` versus
+- `rollout(sys, τₓ)`.
+In both cases the two-argument dispatch of `rollout` is called, but the
+actual implementation is different depending on whether the second argument is
+the initial state or a noise trajectory.
 
-julia> sys = System(ProportionalController([0, 0]),
-                    InvertedPendulum(),
-                    IdealSensor());
-
-julia> d = 5;
-
-julia> rollout(sys);
-
-julia> rollout(sys; d=d);
-
-julia> s₀ = rand(Ps(sys.env));
-
-julia> rollout(sys, s₀; d=d);  # providing s₀
-
-julia> τₓ = [(xs=0.01*randn(2), xo=nothing, xa=nothing) for _ in 1:d];
-
-julia> rollout(sys, τₓ);
-```
-
-
-Initial state `s₀` can be provided or is sampled from [`Ps(sys.env)`](@ref).
-Depth `d` defaults to `1` but can be set to `get_depth(sys)` if defined.
-
-# Example
-```@example
-using StanfordAA228V
-sys = System(ProportionalController([0, 0]),
-             InvertedPendulum(),
-             IdealSensor());
-rollout(sys; d=3)
-```
-
-See also [`Ps`](@ref), [`step`](@ref), [`get_depth`](@ref).
-    rollout(sys::System, [s₀, ]𝐱::AbstractVector{<:NamedTuple}; d=length(𝐱))
-
-Rollout `sys` using vector of noise samples `𝐱`.
-Initial state `s₀` can be provided or is sampled from `Ps(sys.env)`.
-
-# Examples
-```jldoctest
-julia> using StanfordAA228V, Distributions, LinearAlgebra
-
-julia> Σₒ = Diagonal([deg2rad(1.0), deg2rad(1.0)]);
-
-julia> 𝐱 = [(xo = rand(MvNormal([0.1; 0.0], Σₒ)),  # biased mean
-             xs = [0.0; 0.0], xa = 0)
-            for _ in 1:20];
-
-julia> sys = System(ProportionalController([-0.1, 0]),
-                    InvertedPendulum(),
-                    AdditiveNoiseSensor(MvNormal(Σₒ)));
-
-julia> τ = rollout(sys, 𝐱)
-
-julia> abs(τ[end].s[1]) > pi/8
-true
-```
-
-    rollout(sys::System[, s₀], p::TrajectoryDistribution; d=depth(p))
-
-Rollout `sys` using noise and an initial state drawn according to the trajectory distribution.
-One instantiation of a `TrajectoryDistribution` is the `NominalTrajectoryDistribution`
-which results in equivalent rollouts to the 1-arg `rollout(sys)` function.
-
-# Examples
-```jldoctest
-julia> using StanfordAA228V, LinearAlgebra, Random, Distributions; import Random: seed!
-
-julia> Σₒ = Diagonal([deg2rad(1.0), deg2rad(1.0)]);
-
-julia> sys = System(ProportionalController(rand(2)),
-                    InvertedPendulum(),
-                    AdditiveNoiseSensor(MvNormal(Σₒ)));
-
-julia> seed!(1); τ1 = rollout(sys; d=5);
-
-julia> seed!(1); τ2 = rollout(sys, NominalTrajectoryDistribution(sys, 5));
-
-julia> [s for (; s, o, a) in τ1] ≈ [s for (; s, o, a) in τ2]
-true
-```
-
-See also [`NominalTrajectoryDistribution`](@ref).
+The solution is that Julia's dispatch mechanism checks the type of the second argument.
+If `s₀ isa Vector{<:Real}`, i.e., a vector of e.g. `Float64`, then a different
+function is called than when `τₓ isa Vector{<:NamedTuple}`.
+If you want to learn more about this, check [Wikipedia: Multiple Dispatch](https://en.wikipedia.org/wiki/Multiple_dispatch)
+and [Julia: Methods](https://docs.julialang.org/en/v1/manual/methods/).
 """
 function rollout end
 
