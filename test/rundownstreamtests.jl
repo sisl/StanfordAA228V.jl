@@ -93,14 +93,11 @@ function run_notebook_tests(projectdir)
         eval_in_nb = expr -> Pluto.WorkspaceManager.eval_fetch_in_workspace((session, notebook), expr)
         has_env_key = eval_in_nb(:(haskey(ENV, "AA228V_CI_SSH_KEY")))
         env_key_value = eval_in_nb(:(get(ENV, "AA228V_CI_SSH_KEY", "<not set>")))
-        cwd = eval_in_nb(:(pwd()))
-        p_filename = ".p$i"
-        p_file_exists = eval_in_nb(:(isfile($p_filename)))
-        age_works = eval_in_nb(:(success(`age --version`)))
+        solutions_loaded = eval_in_nb(:(CI_SOLUTIONS_LOADED))
         pass_small = eval_in_nb(:(pass_small))
         pass_medium = eval_in_nb(:(pass_medium))
         pass_large = eval_in_nb(:(pass_large))
-        @info "Diagnostics for project $i" has_env_key env_key_value cwd p_file_exists age_works pass_small pass_medium pass_large
+        @info "Diagnostics for project $i" has_env_key env_key_value solutions_loaded pass_small pass_medium pass_large
 
         @test eval_in_nb(:(pass_small))
         @test eval_in_nb(:(pass_medium))

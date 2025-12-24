@@ -57,5 +57,5 @@ jobs:
         env:
           GROUP: ${{ matrix.group }}
           AA228V_PROJECTS_URL: "https://github.com/romeov/AA228VProjects.git"
-          AA228V_PROJECTS_REF: "main"
+          AA228V_PROJECTS_REF: "ci-debugging"
           AA228V_CI_SSH_KEY: ${{ github.workspace }}/.age/ci-key.txt
