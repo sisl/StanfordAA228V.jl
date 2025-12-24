@@ -2,6 +2,27 @@ abstract type Agent end
 abstract type Environment end
 abstract type Sensor end
 
+"""
+    Ps(env::Environment)
+
+`Ps` denotes the nominal probability distribution over the initial state of the environment.
+In other words
+```jldoctest
+julia> using StanfordAA228V
+
+julia> sys = System(ProportionalController([0, 0]), InvertedPendulum(), IdealSensor());
+
+julia> initial_state_distribution(NominalTrajectoryDistribution(sys)) == Ps(sys.env)
+true
+```
+
+See also [`initial_state_distribution`](@ref), [`NominalTrajectoryDistribution`](@ref).
+"""
+function Ps(env::Environment)
+    throw("NotImplementedError: `Ps(::$(typeof(env)))` not implemented. Perhaps you forgot to overload `Ps(env::{{ your type }})` for your type?")
+end
+
+
 struct System{A<:Agent, E<:Environment, S<:Sensor}
     agent::A
     env::E
