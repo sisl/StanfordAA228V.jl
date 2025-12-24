@@ -1,98 +1,117 @@
 using Git
 using Pluto
-using Pkg
 using Test
 using TOML
 
-# Clone or update https://github.com/sisl/AA228VProjects
-# Note that this is cloned during CI already, so cloning is typically only needed for local testing.
+# --- Helper functions for editing Pluto notebook embedded TOML ---
+
+"""
+Extract the content of a PLUTO_*_TOML_CONTENTS variable from a notebook string.
+Returns (content, start_idx, end_idx) where indices span the entire assignment.
+"""
+function extract_pluto_toml(notebook::AbstractString, varname::AbstractString)
+    # Match: VARNAME = \"""...\"""
+    pattern = Regex("($varname\\s*=\\s*\"\"\"\n)(.*?)(\n\"\"\")", "s")
+    m = match(pattern, notebook)
+    isnothing(m) && error("Could not find $varname in notebook")
+    return (m.captures[2], m.offset, m.offset + length(m.match) - 1)
+end
+
+"""
+Replace a PLUTO_*_TOML_CONTENTS variable in the notebook with new TOML content.
+"""
+function replace_pluto_toml(notebook::AbstractString, varname::AbstractString, new_content::AbstractString)
+    content, start_idx, end_idx = extract_pluto_toml(notebook, varname)
+    prefix = "$varname = \"\"\"\n"
+    suffix = "\n\"\"\""
+    return notebook[1:start_idx-1] * prefix * new_content * suffix * notebook[end_idx+1:end]
+end
+
+"""
+Modify the embedded Project.toml: remove StanfordAA228V compat, add sources section.
+"""
+function patch_project_toml(toml_content::AbstractString, pkg_path::AbstractString)
+    proj = TOML.parse(toml_content)
+    if haskey(proj, "compat")
+        delete!(proj["compat"], "StanfordAA228V")
+    end
+    proj["sources"] = Dict("StanfordAA228V" => Dict("path" => pkg_path))
+    return sprint(TOML.print, proj)
+end
+
+"""
+Modify the embedded Manifest.toml: remove the StanfordAA228V entry.
+"""
+function patch_manifest_toml(toml_content::AbstractString)
+    manifest = TOML.parse(toml_content)
+    if haskey(manifest, "deps")
+        delete!(manifest["deps"], "StanfordAA228V")
+    end
+    return sprint(TOML.print, manifest)
+end
+
+"""
+Patch a Pluto notebook file to use a local path for StanfordAA228V.
+"""
+function patch_notebook!(notebookfile::AbstractString, pkg_path::AbstractString)
+    notebook = read(notebookfile, String)
+
+    # Patch Project.toml
+    proj_content, _, _ = extract_pluto_toml(notebook, "PLUTO_PROJECT_TOML_CONTENTS")
+    new_proj = patch_project_toml(proj_content, pkg_path)
+    notebook = replace_pluto_toml(notebook, "PLUTO_PROJECT_TOML_CONTENTS", new_proj)
+
+    # Patch Manifest.toml
+    manifest_content, _, _ = extract_pluto_toml(notebook, "PLUTO_MANIFEST_TOML_CONTENTS")
+    new_manifest = patch_manifest_toml(manifest_content)
+    notebook = replace_pluto_toml(notebook, "PLUTO_MANIFEST_TOML_CONTENTS", new_manifest)
+
+    write(notebookfile, notebook)
+    @info "Patched $notebookfile to use local StanfordAA228V at $pkg_path"
+end
+
+# --- Clone AA228VProjects and run tests ---
+
 repo_url = get(ENV, "AA228V_PROJECTS_URL", "https://github.com/sisl/AA228VProjects.git")
 projects_ref = get(ENV, "AA228V_PROJECTS_REF", "main")
-projectdir = get(ENV, "AA228V_PROJECTS_DIR", joinpath(dirname(@__DIR__), "..", "..", "AA228VProjects"))
+aa228v_pkgdir = isinteractive() ? pwd() : dirname(dirname(@__FILE__))
 
-# Clone repo if it doesn't exist, otherwise pull latest
-if !isdir(projectdir)
-    @info """
-    Did not find project directory: $(projectdir).
-    Cloning $repo_url to $projectdir (branch: $projects_ref)
-    """
-    run(`$(git()) clone --branch $projects_ref $repo_url $projectdir`)
-else
-    @info """
-    Found project directory: $(projectdir). Ignoring `repo_url`.
-    Updating $projectdir (discarding any local changes)
-    """
+function run_notebook_tests(projectdir)
+    notebookfiles = [joinpath(projectdir, "project$i", "project$i.jl") for i in 1:3]
+
+    @testset "Project $i" for (i, notebookfile) in zip(1:3, notebookfiles)
+        @info "Testing project $i: $notebookfile"
+
+        patch_notebook!(notebookfile, aa228v_pkgdir)
+
+        session = Pluto.ServerSession()
+        notebook = Pluto.SessionActions.open(session, notebookfile; run_async=false)
+
+        @test all(c -> !c.errored, values(notebook.cells))
+        @test Pluto.WorkspaceManager.eval_fetch_in_workspace((session, notebook), :(pass_small))
+        @test Pluto.WorkspaceManager.eval_fetch_in_workspace((session, notebook), :(pass_medium))
+        @test Pluto.WorkspaceManager.eval_fetch_in_workspace((session, notebook), :(pass_large))
+
+        @info "Project $i passed. Shutting down session."
+        Pluto.SessionActions.shutdown(session, notebook; async=false)
+    end
+end
+
+if haskey(ENV, "AA228V_PROJECTS_DIR")
+    # Use existing directory (for local development)
+    projectdir = ENV["AA228V_PROJECTS_DIR"]
+    @info "Using existing project directory: $projectdir"
     cd(projectdir) do
         run(`$(git()) fetch --all`)
         run(`$(git()) switch --force --detach $projects_ref`)
         run(`$(git()) clean -fd`)
     end
+    run_notebook_tests(projectdir)
+else
+    # Clone to tempdir (auto-cleanup)
+    mktempdir() do projectdir
+        @info "Cloning $repo_url to $projectdir (branch: $projects_ref)"
+        run(`$(git()) clone --branch $projects_ref $repo_url $projectdir`)
+        run_notebook_tests(projectdir)
+    end
 end
-
-projects = ["project0", "project1", "project2", "project3"]
-aa228v_pkgdir = (isinteractive() ? pwd() : dirname(dirname(@__FILE__)))
-@show aa228v_pkgdir
-
-for project in projects
-    notebookfile = joinpath(projectdir, project, project * ".jl")
-
-    @info "Testing $project"
-    # Here we must make sure to "dev" the current version of the package.
-    # The issue is that if there is any package resolution failure, Pluto
-    # deletes the whole Manifest (via GracefulPkg.jl). So adding a custom
-    # path to the manifest is fragile. Instead we must add a `[sources]`
-    # section to the Project.toml file, which will "survive" a Manifest
-    # reset. We must also remove any `compat` entry for our package.
-
-    # Activate the notebook's environment and develop the local package.
-    # We sleep briefly after changes to make sure all files can sync.
-    Pluto.activate_notebook_environment(notebookfile)
-    @info "Removing upstream StanfordAA228V and updating Plots (for compat)."
-    withenv("JULIA_PKG_PRECOMPILE_AUTO" => 0) do
-        Pkg.rm("StanfordAA228V")  # this removes the compat
-        sleep(1)
-        Pkg.develop(name="StanfordAA228V", path=aa228v_pkgdir)
-    end
-    sleep(3)
-    @info "Adding [sources] section to $(Pkg.project().path)."
-    pkgproject = read(Pkg.project().path, String) |> TOML.parse
-    pkgproject["sources"] = Dict("StanfordAA228V" => Dict("path" => aa228v_pkgdir))
-    open(Pkg.project().path; write=true) do io
-        TOML.print(io, pkgproject)
-    end
-    sleep(0.5)
-    @info "Resolving env."
-    Pkg.resolve()
-    @info "Instantiating env."
-    Pkg.instantiate()
-
-    # check that Manifest is updated correctly
-    pkgmanifest = let path = joinpath(dirname(Pkg.project().path), "Manifest.toml")
-        TOML.parse(read(path, String))
-    end
-    @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
-    # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
-
-    # Open and run the notebook.
-    session = Pluto.ServerSession()
-    @info "Running notebook for $project."
-    notebook = Pluto.SessionActions.open(session, notebookfile; run_async=false)
-
-    # Check that all cells succeeded.
-    @test all(c -> c.errored == false, values(notebook.cells))
-    @info "$project completed successfully"
-
-    # Check that custom path is still used after GracefulPkg has done its job.
-    pkgmanifest = let path = joinpath(dirname(Pkg.project().path), "Manifest.toml")
-        TOML.parse(read(path, String))
-    end
-    @test haskey(pkgmanifest["deps"]["StanfordAA228V"][], "path")
-    # @test !haskey(pkgmanifest["deps"]["StanfordAA228V"][], "git-tree-sha1")
-    @info "Done. Shutting down session for $project."
-    Pluto.SessionActions.shutdown(session, notebook; async=false)
-end
-
-# Step 2:
-# copy in the answers, e.g. via key that I store in the envvar of the repo and use to decode the answers
-# we probably encode the files with `age`
-# We can think about using `Argus` to pattern match the cells that we want to delete

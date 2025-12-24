@@ -37,11 +37,25 @@ jobs:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
+
+      - name: Install age
+        run: |
+          sudo apt-get update && sudo apt-get install -y age
+
+      - name: Setup age secret key
+        env:
+          AGE_SECRET_KEY: ${{ secrets.AGE_SECRET_KEY }}
+        run: |
+          mkdir -p .age
+          echo "$AGE_SECRET_KEY" > .age/ci-key.txt
+          chmod 600 .age/ci-key.txt
+
       - name: Add SISL Registry
         run: julia -e 'using Pkg; Pkg.Registry.add(RegistrySpec(url="https://github.com/sisl/Registry"))'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
         env:
           GROUP: ${{ matrix.group }}
-          AA228V_PROJECTS_URL: "https://github.com/RomeoV/AA228VProjects.git"
-          AA228V_PROJECTS_REF: "bump-deps"
+          AA228V_PROJECTS_URL: "https://github.com/romeov/AA228VProjects.git"
+          AA228V_PROJECTS_REF: "main"
+          AA228V_CI_SSH_KEY: ${{ github.workspace }}/.age/ci-key.txt
