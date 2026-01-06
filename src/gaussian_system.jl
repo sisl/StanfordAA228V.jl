@@ -32,3 +32,16 @@ const Project2SmallSystem::Type = Project1SmallSystem
 The [`SimpleGaussian`](@ref) environment runs for a single step only.
 """
 get_depth(sys::Project1SmallSystem) = 1
+
+# we have to define this for compatibility as we usually require s0 to be a vector except for this system
+function rollout(sys::System{AT, SimpleGaussian}, s₀::Number; d=1) where {AT}
+    s = s₀
+    τ = []
+    D = DisturbanceDistribution(sys)
+    for _ in 1:d
+        o, a, s′, x = step(sys, s, D)
+        push!(τ, (; s, o, a, x))
+        s = s′
+    end
+    return identity.(τ)  # `identity` converts `Vector{Any}` to concrete vector
+end
