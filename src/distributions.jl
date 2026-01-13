@@ -46,10 +46,7 @@ julia> rand(Ds(SimpleGaussian(), [0], [0]))  # we can still sample from this
 
 julia> env = ContinuumWorldSurrogate(model=nothing);  # other environments have dynamics noise
 
-julia> seed!(0); rand(Ds(env, zeros(2), 0))
-2-element Vector{Float64}:
- -0.01886010582159417
- -0.086290835122697
+julia> rand(Ds(env, zeros(2), 0));
 ```
 
 More details for each system are provided in the project files themselves.

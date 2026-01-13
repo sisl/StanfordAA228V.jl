@@ -115,7 +115,7 @@ action noise `xa` is rolled out as follows:
 
 ## Examples
 ```jldoctest rollout
-julia> pτ = NominalTrajectoryDistribution(sys, 5)  # or another `FuzzingDistribution`
+julia> pτ = NominalTrajectoryDistribution(sys, 5);  # or another `FuzzingDistribution`
 
 julia> τ1 = rollout(sys, pτ);  # this is effectively the same as `rollout(sys)`
 
@@ -245,22 +245,21 @@ julia> struct MyFuzzingDistribution{S<:System} <: TrajectoryDistribution
          param::Float64
        end;
 
-julia> # IMPORTANT: we have to explicitly import external functions to ovlerload them
 
-julia> import StanfordAA228V: initial_state_distribution, disturbance_distribution, depth
+julia> StanfordAA228V.initial_state_distribution(pτ::MyFuzzingDistribution) =
+           Ps(pτ.sys.env);  # system default
 
-julia> initial_state_distribution(pτ::MyFuzzingDistribution) = Ps(pτ.sys.env);  # system default
-
-julia> disturbance_distribution(pτ::MyFuzzingDistribution, t) = DisturbanceDistribution(
+julia> StanfordAA228V.disturbance_distribution(pτ::MyFuzzingDistribution, t) =
+         DisturbanceDistribution(
            (o) -> Deterministic(0),  # action noise -> always 0
-           (s, a) -> Ds(pτ.sys.env, s, a),  # dynamics noise -> regular system dynamics
+           (s, a) -> Ds(pτ.sys.env, s, a),  # dynamics noise -> regular dynamics
            (s) -> MvNormal(
-                    mean(Do(sys.sensor, s)),
-                    pτ.param*cov(Do(sys.sensor, s))
+                    zeros(2),
+                    pτ.param*I(2)
                   )  # observation noise -> nominal with increase covariance
-       );
+         );
 
-julia> depth(pτ::MyFuzzingDistribution) = 10;
+julia> StanfordAA228V.depth(pτ::MyFuzzingDistribution) = 10;
 
 julia> sys = System(ProportionalController([0, 0]),
                     InvertedPendulum(),
