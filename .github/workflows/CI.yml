@@ -49,7 +49,9 @@ jobs:
       - name: Decrypt solutions
         env:
           AGE_SECRET_KEY: ${{ secrets.AGE_SECRET_KEY }}
-        run: ${{ runner.temp }}/projects/.ci/decrypt.sh
+        run: |
+          [[ -n "$AGE_SECRET_KEY" ]] || { echo "::error::AGE_SECRET_KEY secret is not set"; exit 1; }
+          ${{ runner.temp }}/projects/.ci/decrypt.sh
 
       - name: Add SISL Registry
         run: julia -e 'using Pkg; Pkg.Registry.add(RegistrySpec(url="https://github.com/sisl/Registry"))'
