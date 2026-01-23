@@ -22,8 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          # - '1'
-          - '1.12'
+          - '1.13'
         os:
           - ubuntu-latest
           # - windows-latest
@@ -38,24 +37,22 @@ jobs:
           arch: ${{ matrix.arch }}
       - uses: julia-actions/cache@v2
 
+      - name: Clone projects
+        run: git clone --depth=1 --branch ci https://github.com/sisl/AA228VProjects.git ${{ runner.temp }}/projects
+
       - name: Install age
         run: |
-          sudo apt-get update && sudo apt-get install -y age
+          curl -sL https://github.com/FiloSottile/age/releases/download/v1.3.1/age-v1.3.1-linux-amd64.tar.gz | tar xz
+          echo "$PWD/age" >> $GITHUB_PATH
 
-      - name: Setup age secret key
+      - name: Decrypt solutions
         env:
           AGE_SECRET_KEY: ${{ secrets.AGE_SECRET_KEY }}
-        run: |
-          mkdir -p .age
-          echo "$AGE_SECRET_KEY" > .age/ci-key.txt
-          chmod 600 .age/ci-key.txt
+        run: ${{ runner.temp }}/projects/decrypt.sh
 
       - name: Add SISL Registry
         run: julia -e 'using Pkg; Pkg.Registry.add(RegistrySpec(url="https://github.com/sisl/Registry"))'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
         env:
-          GROUP: ${{ matrix.group }}
-          AA228V_PROJECTS_URL: "https://github.com/romeov/AA228VProjects.git"
-          AA228V_PROJECTS_REF: "main"
-          AA228V_CI_SSH_KEY: ${{ github.workspace }}/.age/ci-key.txt
+          AA228V_PROJECTS_DIR: ${{ runner.temp }}/projects
