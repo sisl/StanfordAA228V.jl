@@ -59,3 +59,4 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
         env:
           AA228V_PROJECTS_DIR: ${{ runner.temp }}/projects
+          AA228V_CI_MODE: "1"
