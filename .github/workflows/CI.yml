@@ -35,6 +35,7 @@ jobs:
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
+          include-all-prereleases: true
       - uses: julia-actions/cache@v2
 
       - name: Clone projects
